@@ -9,12 +9,11 @@ LazyData: true
 Imports: 
     shiny,
     golem,
-    processx,
-    attempt,
     DT,
-    glue,
-    htmltools
-RoxygenNote: 6.1.0
+    magrittr,
+    purrr,
+    tidyr (>= 1.0.0)
+RoxygenNote: 7.0.2
 URL: https://github.com/r4ds/mentordash
 BugReports: https://github.com/r4ds/mentordash/issues
 Suggests: 
