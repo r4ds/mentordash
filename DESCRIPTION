@@ -1,7 +1,11 @@
 Package: mentordash
 Title: Dashboard for the R4DS Online Learning Community
-Version: 0.0.0.9000
-Authors@R: person('Jon', 'Harmon', email = 'jonthegeek@gmail.com', role = c('cre', 'aut'))
+Version: 0.1.0
+Authors@R: c(
+    person(
+      'Jon', 'Harmon', email = 'jonthegeek@gmail.com', role = c('cre', 'aut')
+    )
+    )
 Description: This is a golem shiny app for the R4DS Online Learning Community.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -14,7 +18,10 @@ Imports:
     purrr,
     tidyr (>= 1.0.0),
     slackteams (>= 0.1.2),
-    slackthreads
+    slackthreads,
+    shinydashboard,
+    dplyr,
+    tibble
 RoxygenNote: 7.0.2
 URL: https://github.com/r4ds/mentordash
 BugReports: https://github.com/r4ds/mentordash/issues

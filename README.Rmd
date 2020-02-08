@@ -37,6 +37,16 @@ And the development version from [GitHub](https://github.com/) with:
 # install.packages("devtools")
 devtools::install_github("r4ds/mentordash")
 ```
+
+## Setup
+
+To run mentordash, you must first configure slackteams.
+
+1. Follow the instructions in the [slackteams README](https://github.com/yonicd/slackteams/blob/master/README.md).
+2. Run `slackteams::load_teams`.
+3. Run `slackteams::activate_team("r4ds")`.
+4. Run `slackteams::activeteam2dcf()`.
+
 ## Example
 
 ```{r example, eval=FALSE}

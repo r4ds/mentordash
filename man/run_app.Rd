@@ -7,5 +7,6 @@
 run_app(...)
 }
 \description{
-Run the Shiny Application
+This function launches a Shiny App to help R4DS Online Learning Community
+mentors find unanswered questions.
 }

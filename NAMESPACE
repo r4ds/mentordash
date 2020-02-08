@@ -2,10 +2,4 @@
 
 export("%>%")
 export(run_app)
-importFrom(glue,glue)
-importFrom(htmltools,HTML)
-importFrom(htmltools,tagAppendAttributes)
-importFrom(htmltools,tagList)
-importFrom(htmltools,tags)
 importFrom(magrittr,"%>%")
-importFrom(shiny,column)
