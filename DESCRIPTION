@@ -12,9 +12,14 @@ Imports:
     DT,
     magrittr,
     purrr,
-    tidyr (>= 1.0.0)
+    tidyr (>= 1.0.0),
+    slackteams (>= 0.1.2),
+    threads
 RoxygenNote: 7.0.2
 URL: https://github.com/r4ds/mentordash
 BugReports: https://github.com/r4ds/mentordash/issues
 Suggests: 
     testthat
+Remotes: 
+    yonicd/slackteams
+    yonicd/threads

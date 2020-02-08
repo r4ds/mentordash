@@ -16,7 +16,7 @@
   question_channels <- setNames(question_channels, question_channels)
   ## Read in Conversations ----
   convos <- lapply(question_channels, function(channel) {
-    threads::get_conversations(limit = 1000, channel = channel)
+    threads::conversations(limit = 1000, channel = channel)
   })
   ## Response to Tibble ----
   convos_tbl <- purrr::map_df(convos, .tidy_convo, .id = 'channel') %>%
@@ -76,7 +76,7 @@ get_permalink <- function(channel,
 }
 
 .tidy_convo <- function(convo){
-  y <- purrr::map_df(convo$messages,.f=function(x) {
+  y <- purrr::map_df(convo,.f=function(x) {
     if(is.null(x$client_msg_id))
       x$client_msg_id <- NA_character_
 
