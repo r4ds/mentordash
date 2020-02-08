@@ -16,7 +16,7 @@
   question_channels <- setNames(question_channels, question_channels)
   ## Read in Conversations ----
   convos <- lapply(question_channels, function(channel) {
-    threads::conversations(limit = 1000, channel = channel)
+    slackthreads::conversations(channel = channel)
   })
   ## Response to Tibble ----
   convos_tbl <- purrr::map_df(convos, .tidy_convo, .id = 'channel') %>%
@@ -44,7 +44,7 @@
 get_permalink <- function(channel,
                           timestamp,
                           api_token = Sys.getenv("SLACK_API_TOKEN")) {
-  # Migrate this to threads.
+  # Migrate this to slackthreads.
   if ( !is.character(channel) | length(channel) > 1 ) { stop("channel must be a character vector of length one") }
   if ( !is.character(api_token) | length(api_token) > 1 ) { stop("api_token must be a character vector of length one") }
 
