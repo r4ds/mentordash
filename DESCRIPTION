@@ -1,6 +1,6 @@
 Package: mentordash
 Title: Dashboard for the R4DS Online Learning Community
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person(
       'Jon', 'Harmon', email = 'jonthegeek@gmail.com', role = c('cre', 'aut')
@@ -28,5 +28,5 @@ BugReports: https://github.com/r4ds/mentordash/issues
 Suggests: 
     testthat
 Remotes: 
-    yonicd/slackteams
+    yonicd/slackteams,
     yonicd/slackthreads

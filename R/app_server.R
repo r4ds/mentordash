@@ -18,7 +18,7 @@
   # Eventually the question list should probably be a reactivePoll of some sort.
   # For now it will just load once.
   slackteams::load_team_dcf("r4ds")
-  slackteams::activate_team('r4ds')
+  slackteams::activate_team("r4ds")
   channels <- slackteams::get_team_channels()
   question_channels <- sort(
     grep('^[1-9]', channels$name[channels$is_channel], value = TRUE)
