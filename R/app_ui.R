@@ -5,8 +5,11 @@
 .ui_main <- function() {
   dashboard_title <- "R4DS Mentor Tool"
   shiny::tagList(
-    # Leave this function for adding external resources
-    .golem_add_external_resources(),
+    # Leave this function for adding external resources. But commenting out
+    # until I use it to avoid bugs.
+
+    # .golem_add_external_resources(),
+
     # List the first level UI elements here
     shinydashboard::dashboardPage(
       header = .ui_header(dashboard_title),
