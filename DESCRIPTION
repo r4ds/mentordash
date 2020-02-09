@@ -1,6 +1,6 @@
 Package: mentordash
 Title: Dashboard for the R4DS Online Learning Community
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(
     person(
       'Jon', 'Harmon', email = 'jonthegeek@gmail.com', role = c('cre', 'aut')
