@@ -62,10 +62,14 @@
     tidyr::unnest_wider(conversations) %>%
     dplyr::mutate(
       heavy_check_mark = .has_reaction(reactions, "heavy_check_mark"),
-      speech_balloon = .has_reaction(reactions, "speech_balloon"),
       thread_tag = .has_reaction(reactions, "thread")
     ) %>%
-    dplyr::filter(!heavy_check_mark) %>%
+    dplyr::filter(!heavy_check_mark, !thread_tag) %>%
+    dplyr::mutate(
+      speech_balloon = .has_reaction(reactions, "speech_balloon"),
+      answerable = .is_answerable(speech_balloon, user, replies)
+    ) %>%
+    dplyr::filter(answerable) %>%
     dplyr::mutate(
       link = purrr::map2(channel_id, ts, function(chnl, this_ts) {
         paste0(
@@ -118,6 +122,40 @@
       )
     }
   })
+}
+
+#' Check Whether a Question is Answerable
+#'
+#' @param speech_balloons The logical vector indicating whether a question is
+#'   tagged with the "needs more information" emoji.
+#' @param users The character vector of users who posted the question.
+#' @param replieses The list of lists of replies to each message.
+#'
+#' @return A logical vector.
+#' @keywords internal
+.is_answerable <- function(speech_balloons, users, replieses) {
+  purrr::pmap_lgl(
+    .l = list(
+      speech_balloon = speech_balloons,
+      user = users,
+      replies = replieses
+    ),
+    .f = function(speech_balloon, user, replies) {
+      if (!speech_balloon) {
+        return(TRUE)
+      } else {
+        if (all(is.na(replies))) {
+          return(TRUE)
+        } else {
+          if (dplyr::last(replies)$user == user) {
+            return(TRUE)
+          } else {
+            return(FALSE)
+          }
+        }
+      }
+    }
+  )
 }
 
 #' Render the Questions DataTable
