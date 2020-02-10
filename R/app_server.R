@@ -83,6 +83,18 @@
           "\">link</a>"
         )
       }),
+      redirect_link = purrr::map2(channel_id, ts, function(chnl, this_ts) {
+        paste0(
+          "<a href=\"",
+          paste(
+            "https://rfordatascience.slack.com/archives",
+            chnl,
+            paste0("p", sub(x = this_ts, "\\.", "")),
+            sep = "/"
+          ),
+          "\">link</a>"
+        )
+      }),
       latest_activity = as.POSIXct(
         purrr::map2_dbl(
           as.numeric(ts), as.numeric(latest_reply),
@@ -93,7 +105,7 @@
       )
     ) %>%
     dplyr::select(
-      channel, link, latest_activity
+      channel, link, redirect_link, latest_activity
     ) %>%
     dplyr::arrange(dplyr::desc(latest_activity))
 
