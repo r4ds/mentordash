@@ -8,6 +8,7 @@
   questions_df <- .get_questions()
 
   output$questions <- .render_questions(questions_df)
+  session$onSessionEnded(stopApp)
 }
 
 #' Get R4DS Question Threads
