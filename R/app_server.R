@@ -72,7 +72,7 @@
     ) %>%
     dplyr::filter(answerable) %>%
     dplyr::mutate(
-      link = purrr::map2(channel_id, ts, function(chnl, this_ts) {
+      `web link` = purrr::map2(channel_id, ts, function(chnl, this_ts) {
         paste0(
           "<a href=\"",
           paste(
@@ -84,7 +84,7 @@
           "\">link</a>"
         )
       }),
-      redirect_link = purrr::map2(channel_id, ts, function(chnl, this_ts) {
+      `app link` = purrr::map2(channel_id, ts, function(chnl, this_ts) {
         paste0(
           "<a href=\"",
           paste(
@@ -106,7 +106,7 @@
       )
     ) %>%
     dplyr::select(
-      channel, link, redirect_link, latest_activity
+      channel, `web link`, `app link`, latest_activity
     ) %>%
     dplyr::arrange(dplyr::desc(latest_activity))
 
