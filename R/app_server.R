@@ -75,7 +75,7 @@
     tidyr::unnest_wider(.data$conversations) %>%
     # Get rid of channel_join and channel_name.
     dplyr::filter(
-      !(.data$subtype %in% c("channel_join", "channel_name"))
+      !(.data$subtype %in% c("channel_join", "channel_name", "bot_add"))
     ) %>%
     dplyr::mutate(
       heavy_check_mark = .has_reaction(.data$reactions, "heavy_check_mark"),
