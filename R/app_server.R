@@ -5,19 +5,23 @@
 #' @return Shiny reactive updates.
 #' @keywords internal
 .app_server <- function(input, output,session) {
-  questions_df <- .get_questions()
+  question_channels <- .get_question_channels()
 
-  output$questions <- .render_questions(questions_df)
+  questions_df <- shiny::eventReactive(
+    input$refresh,
+    {.get_questions(question_channels)},
+    ignoreNULL = FALSE
+  )
+
+  output$questions <- DT::renderDataTable({questions_df()}, escape = FALSE)
+
+  # The button says "Please wait..." until everything loads.
+  shiny::updateActionButton(session, inputId = "refresh", label = "Refresh")
+
   session$onSessionEnded(shiny::stopApp)
 }
 
-#' Get R4DS Question Threads
-#'
-#' @return A tidy tibble of question information.
-#' @keywords internal
-.get_questions <- function() {
-  # Eventually the question list should probably be a reactivePoll of some sort.
-  # For now it will just load once.
+.get_question_channels <- function() {
   slackteams::load_team_dcf("r4ds")
   slackteams::activate_team("r4ds")
   channels <- slackteams::get_team_channels()
@@ -25,7 +29,14 @@
     grep('^help_', channels$name[channels$is_channel], value = TRUE)
   )
   names(question_channels) <- question_channels
+  return(question_channels)
+}
 
+#' Get R4DS Question Threads
+#'
+#' @return A tidy tibble of question information.
+#' @keywords internal
+.get_questions <- function(question_channels) {
   ## Read in Conversations ----
   convos <- purrr::map(
     question_channels,
@@ -184,22 +195,5 @@
         }
       }
     }
-  )
-}
-
-#' Render the Questions DataTable
-#'
-#' @param df A dataframe of questions.
-#'
-#' @return A \code{\link[DT]{renderDataTable}}.
-#' @keywords internal
-.render_questions <- function(df) {
-  shiny::callModule(
-    module = function(input, output, server) {
-      DT::renderDataTable({
-        df
-      }, escape = FALSE)
-    },
-    id = "questions"
   )
 }
