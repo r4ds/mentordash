@@ -22,7 +22,7 @@
   slackteams::activate_team("r4ds")
   channels <- slackteams::get_team_channels()
   question_channels <- sort(
-    grep('^[1-9]', channels$name[channels$is_channel], value = TRUE)
+    grep('^help_', channels$name[channels$is_channel], value = TRUE)
   )
   names(question_channels) <- question_channels
 
@@ -61,6 +61,10 @@
     .id = "channel"
   ) %>%
     tidyr::unnest_wider(conversations) %>%
+    # Get rid of channel_join and channel_name.
+    dplyr::filter(
+      !(subtype %in% c("channel_join", "channel_name"))
+    ) %>%
     dplyr::mutate(
       heavy_check_mark = .has_reaction(reactions, "heavy_check_mark"),
       thread_tag = .has_reaction(reactions, "thread")
