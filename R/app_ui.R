@@ -53,7 +53,8 @@
 #' @keywords internal
 .ui_body <- function() {
   shinydashboard::dashboardBody(
-    DT::dataTableOutput("questions")
+    DT::dataTableOutput("questions"),
+    shiny::actionButton("refresh", label = "Please wait...")
   )
 }
 

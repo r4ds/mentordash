@@ -4,7 +4,7 @@
 \alias{.get_questions}
 \title{Get R4DS Question Threads}
 \usage{
-.get_questions()
+.get_questions(question_channels)
 }
 \value{
 A tidy tibble of question information.
