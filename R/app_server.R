@@ -44,6 +44,7 @@
 #'
 #' @return A tibble of question data.
 #' @keywords internal
+#' @importFrom rlang .data
 .tidy_convos <- function(convos) {
   # For now I'm filtering stuff out here that's "done". Later we'll make these
   # explicit filers.
@@ -60,49 +61,57 @@
     },
     .id = "channel"
   ) %>%
-    tidyr::unnest_wider(conversations) %>%
+    tidyr::unnest_wider(.data$conversations) %>%
     # Get rid of channel_join and channel_name.
     dplyr::filter(
-      !(subtype %in% c("channel_join", "channel_name"))
+      !(.data$subtype %in% c("channel_join", "channel_name"))
     ) %>%
     dplyr::mutate(
-      heavy_check_mark = .has_reaction(reactions, "heavy_check_mark"),
-      thread_tag = .has_reaction(reactions, "thread")
+      heavy_check_mark = .has_reaction(.data$reactions, "heavy_check_mark"),
+      thread_tag = .has_reaction(.data$reactions, "thread")
     ) %>%
-    dplyr::filter(!heavy_check_mark, !thread_tag) %>%
+    dplyr::filter(!.data$heavy_check_mark, !.data$thread_tag) %>%
     dplyr::mutate(
-      speech_balloon = .has_reaction(reactions, "speech_balloon"),
-      answerable = .is_answerable(speech_balloon, user, replies)
+      speech_balloon = .has_reaction(.data$reactions, "speech_balloon"),
+      answerable = .is_answerable(
+        .data$speech_balloon, .data$user, .data$replies
+      )
     ) %>%
-    dplyr::filter(answerable) %>%
+    dplyr::filter(.data$answerable) %>%
     dplyr::mutate(
-      `web link` = purrr::map2(channel_id, ts, function(chnl, this_ts) {
-        paste0(
-          "<a href=\"",
-          paste(
-            "https://app.slack.com/client/T6UC1DKJQ",
-            chnl,
-            this_ts,
-            sep = "/"
-          ),
-          "\">link</a>"
-        )
-      }),
-      `app link` = purrr::map2(channel_id, ts, function(chnl, this_ts) {
-        paste0(
-          "<a href=\"",
-          paste(
-            "https://rfordatascience.slack.com/archives",
-            chnl,
-            paste0("p", sub(x = this_ts, "\\.", "")),
-            sep = "/"
-          ),
-          "\">link</a>"
-        )
-      }),
+      `web link` = purrr::map2(
+        .data$channel_id, .data$ts,
+        function(chnl, this_ts) {
+          paste0(
+            "<a href=\"",
+            paste(
+              "https://app.slack.com/client/T6UC1DKJQ",
+              chnl,
+              this_ts,
+              sep = "/"
+            ),
+            "\">link</a>"
+          )
+        }
+      ),
+      `app link` = purrr::map2(
+        .data$channel_id, .data$ts,
+        function(chnl, this_ts) {
+          paste0(
+            "<a href=\"",
+            paste(
+              "https://rfordatascience.slack.com/archives",
+              chnl,
+              paste0("p", sub(x = this_ts, "\\.", "")),
+              sep = "/"
+            ),
+            "\">link</a>"
+          )
+        }
+      ),
       latest_activity = as.POSIXct(
         purrr::map2_dbl(
-          as.numeric(ts), as.numeric(latest_reply),
+          as.numeric(.data$ts), as.numeric(.data$latest_reply),
           max,
           na.rm = TRUE
         ),
@@ -110,9 +119,12 @@
       )
     ) %>%
     dplyr::select(
-      channel, `web link`, `app link`, latest_activity
+      .data$channel,
+      .data$`web link`,
+      .data$`app link`,
+      .data$latest_activity
     ) %>%
-    dplyr::arrange(dplyr::desc(latest_activity))
+    dplyr::arrange(dplyr::desc(.data$latest_activity))
 
   return(convos_tbl)
 }
