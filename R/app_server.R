@@ -66,7 +66,7 @@
   slackteams::activate_team("r4ds")
   channels <- slackteams::get_team_channels()
   question_channels <- sort(
-    grep('^help_', channels$name[channels$is_channel], value = TRUE)
+    grep('^help', channels$name[channels$is_channel], value = TRUE)
   )
   names(question_channels) <- question_channels
   return(question_channels)
@@ -125,7 +125,7 @@
     dplyr::mutate(
       speech_balloon = .has_reaction(.data$reactions, "speech_balloon"),
       answerable = .is_answerable(
-        .data$speech_balloon, .data$user, .data$replies
+        .data$speech_balloon, .data$user, .data$reply_users
       )
     ) %>%
     # dplyr::filter(.data$answerable) %>%
@@ -215,25 +215,29 @@
 #' @param speech_balloons The logical vector indicating whether a question is
 #'   tagged with the "needs more information" emoji.
 #' @param users The character vector of users who posted the question.
-#' @param replieses The list of lists of replies to each message.
+#' @param reply_userses The list of character vectors of users who have replied
+#'   to this thread.
 #'
 #' @return A logical vector.
 #' @keywords internal
-.is_answerable <- function(speech_balloons, users, replieses) {
+.is_answerable <- function(speech_balloons, users, reply_userses) {
   purrr::pmap_lgl(
     .l = list(
       speech_balloon = speech_balloons,
       user = users,
-      replies = replieses
+      reply_users = reply_userses
     ),
-    .f = function(speech_balloon, user, replies) {
+    .f = function(speech_balloon, user, reply_users) {
       if (!speech_balloon) {
         return(TRUE)
       } else {
-        if (all(is.na(replies))) {
+        if (all(is.na(reply_users))) {
           return(TRUE)
         } else {
-          if (dplyr::last(replies)$user == user) {
+          if (any(reply_users == user)) {
+            # This is a stop-gap. Technically this could still be un-answerable
+            # if they aren't the *latest* reply. We should grab the replies for
+            # such posts and check, but maybe we'll grab them for *everything*.
             return(TRUE)
           } else {
             return(FALSE)
