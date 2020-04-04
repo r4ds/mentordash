@@ -3,7 +3,7 @@
 #' @return A \code{\link[shiny]{tagList}} containing the UI.
 #' @keywords internal
 .ui_main <- function() {
-  dashboard_title <- "R4DS Mentor Tool"
+  dashboard_title <- "R4DS"
   shiny::tagList(
     # Leave this function for adding external resources. But commenting out
     # until I use it to avoid bugs.
@@ -37,6 +37,7 @@
 #' @keywords internal
 .ui_sidebar <- function() {
   shinydashboard::dashboardSidebar(
+    collapsed = TRUE,
     shiny::p(
       paste(
         "Eventually there will be menus here, for example to select channels",
@@ -53,14 +54,35 @@
 #' @keywords internal
 .ui_body <- function() {
   shinydashboard::dashboardBody(
-    DT::dataTableOutput("questions"),
-    shiny::actionButton("refresh", label = "Please wait...")
+    shiny::h2(strong("R4DS Mentor Tool"),style = "padding-left:15px;"),
+    shiny::br(),
+    shiny::fluidRow(style = 'padding-left:15px;padding-right:15px;',
+    shinydashboard::valueBoxOutput('valuebox_answerable'),
+    shinydashboard::valueBoxOutput('valuebox_followup')
+    ),
+    br(),
+
+    shinydashboard::tabBox(width = 12,id = 'questions_tabs',title = "Questions",side = 'right',
+                           shiny::tabPanel(title = "Answerable Questions",
+                                           value = "answerable",
+                                           DT::DTOutput('answerable_questions')
+                           ),
+                           shiny::tabPanel(title = "Waiting for OP Followup",
+                                           value = "followup",
+                                           DT::DTOutput('followup_questions')
+                           )
+    ),
+    br(),
+    shiny::div(style = "text-align:center;",
+               shiny::actionButton("refresh", label = "Please wait...",class = 'btn-primary')
+    ),
+    shiny::br(),
   )
 }
 
 #' Golem Extras
 #'
-#' @return A \code{\link[shiny]{tags}} head element.
+#' @return A \code{\link[shiny]{tags}} head element.\
 #' @keywords internal
 .golem_add_external_resources <- function(){
   shiny::addResourcePath(
@@ -68,11 +90,12 @@
   )
 
   shiny::tags$head(
-    golem::activate_js(),
-    golem::favicon()
+
+    # golem::activate_js(),
+    # golem::favicon()
     # Add here all the external resources
     # If you have a custom.css in the inst/app/www
     # Or for example, you can add shinyalert::useShinyalert() here
-    #tags$link(rel="stylesheet", type="text/css", href="www/custom.css")
+    tags$link(rel="stylesheet", type="text/css", href="www/custom.css")
   )
 }

@@ -13,7 +13,47 @@
     ignoreNULL = FALSE
   )
 
-  output$questions <- DT::renderDataTable({questions_df()}, escape = FALSE)
+  output$valuebox_answerable <- shinydashboard::renderValueBox({
+    count_answerable <- questions_df() %>%
+      dplyr::filter(answerable) %>%
+      nrow()
+
+  shinydashboard::valueBox(count_answerable,
+                           subtitle = "Answerable Questions",
+                           icon = icon('hand-holding-heart'),
+                           color = 'aqua')
+  })
+
+  output$answerable_questions <- DT::renderDataTable({
+    questions_df() %>%
+      dplyr::filter(answerable) %>%
+      dplyr::select(-answerable,-speech_balloon) %>%
+      DT::datatable(rownames = FALSE,
+                    # filter = 'top',
+                    selection = 'single',
+                    escape = FALSE)
+    })
+
+  output$valuebox_followup <- shinydashboard::renderValueBox({
+    count_followup <- questions_df() %>%
+      dplyr::filter(!answerable) %>%
+      nrow()
+
+    shinydashboard::valueBox(count_followup,
+                             subtitle = "Waiting for OP Followup",
+                             icon = icon('comment-dots'),
+                             color = 'teal')
+  })
+
+  output$followup_questions <- DT::renderDataTable({
+    questions_df() %>%
+      dplyr::filter(!answerable) %>%
+      dplyr::select(-answerable,-speech_balloon) %>%
+      DT::datatable(rownames = FALSE,
+                    # filter = 'top',
+                    selection = 'single',
+                    escape = FALSE)
+  })
 
   # The button says "Please wait..." until everything loads.
   shiny::updateActionButton(session, inputId = "refresh", label = "Refresh")
@@ -58,7 +98,7 @@
 #' @importFrom rlang .data
 .tidy_convos <- function(convos) {
   # For now I'm filtering stuff out here that's "done". Later we'll make these
-  # explicit filers.
+  # explicit filters.
 
   convos_tbl <- purrr::map_dfr(
     convos,
@@ -88,7 +128,7 @@
         .data$speech_balloon, .data$user, .data$reply_users
       )
     ) %>%
-    dplyr::filter(.data$answerable) %>%
+    # dplyr::filter(.data$answerable) %>%
     dplyr::mutate(
       `web link` = purrr::map2(
         .data$channel_id, .data$ts,
@@ -101,7 +141,7 @@
               this_ts,
               sep = "/"
             ),
-            "\">link</a>"
+            "\">Web</a>"
           )
         }
       ),
@@ -116,10 +156,12 @@
               paste0("p", sub(x = this_ts, "\\.", "")),
               sep = "/"
             ),
-            "\">link</a>"
+            "\">App</a>"
           )
         }
       ),
+      excerpt = stringr::str_trunc(text,100),
+      links = paste(`web link`, `app link`, sep = " | "),
       latest_activity = as.POSIXct(
         purrr::map2_dbl(
           as.numeric(.data$ts), as.numeric(.data$latest_reply),
@@ -127,12 +169,16 @@
           na.rm = TRUE
         ),
         origin = "1970-01-01"
-      )
+      ),
+      latest_activity = format(latest_activity,"%Y-%m-%d %H:%M:%S")
     ) %>%
     dplyr::select(
       .data$channel,
-      .data$`web link`,
-      .data$`app link`,
+      .data$excerpt,
+      .data$reply_count,
+      .data$speech_balloon,
+      .data$answerable,
+      .data$links,
       .data$latest_activity
     ) %>%
     dplyr::arrange(.data$latest_activity)
