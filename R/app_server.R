@@ -100,6 +100,8 @@
   # For now I'm filtering stuff out here that's "done". Later we'll make these
   # explicit filters.
 
+  bad_subtypes <- c("channel_join", "channel_name", "bot_add", "bot_message")
+
   convos_tbl <- purrr::map_dfr(
     convos,
     function(this_channel) {
@@ -115,7 +117,7 @@
     tidyr::unnest_wider(.data$conversations) %>%
     # Get rid of channel_join and channel_name.
     dplyr::filter(
-      !(.data$subtype %in% c("channel_join", "channel_name", "bot_add"))
+      !(.data$subtype %in% bad_subtypes)
     ) %>%
     dplyr::mutate(
       heavy_check_mark = .has_reaction(.data$reactions, "heavy_check_mark"),
@@ -128,7 +130,6 @@
         .data$speech_balloon, .data$user, .data$reply_users
       )
     ) %>%
-    # dplyr::filter(.data$answerable) %>%
     dplyr::mutate(
       `web link` = purrr::map2(
         .data$channel_id, .data$ts,

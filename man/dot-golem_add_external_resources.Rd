@@ -7,7 +7,7 @@
 .golem_add_external_resources()
 }
 \value{
-A \code{\link[shiny]{tags}} head element.
+
 }
 \description{
 Golem Extras
