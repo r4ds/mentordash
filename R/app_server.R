@@ -62,8 +62,8 @@
 }
 
 .get_question_channels <- function() {
-  slackteams::load_team_dcf("r4ds")
-  slackteams::activate_team("r4ds")
+  slackteams::load_team_dcf("R4ds")
+  slackteams::activate_team("R4ds")
   channels <- slackteams::get_team_channels()
   question_channels <- sort(
     grep('^help', channels$name[channels$is_channel], value = TRUE)
@@ -127,7 +127,8 @@
     dplyr::mutate(
       speech_balloon = .has_reaction(.data$reactions, "speech_balloon"),
       answerable = .is_answerable(
-        .data$speech_balloon, .data$user, .data$reply_users
+        .data$speech_balloon, .data$user, .data$reply_users,
+        channels = .data$channel, tses = .data$thread_ts
       )
     ) %>%
     dplyr::mutate(
@@ -218,32 +219,47 @@
 #' @param users The character vector of users who posted the question.
 #' @param reply_userses The list of character vectors of users who have replied
 #'   to this thread.
+#' @param channels The character vector of channels in which the questions were
+#'   posted.
+#' @param tses The character vector of timestamps for threads attached to the
+#'   question.
 #'
 #' @return A logical vector.
 #' @keywords internal
-.is_answerable <- function(speech_balloons, users, reply_userses) {
+.is_answerable <- function(speech_balloons,
+                           users,
+                           reply_userses,
+                           channels,
+                           tses) {
   purrr::pmap_lgl(
     .l = list(
       speech_balloon = speech_balloons,
       user = users,
-      reply_users = reply_userses
+      reply_users = reply_userses,
+      channel = channels,
+      ts = tses
     ),
-    .f = function(speech_balloon, user, reply_users) {
+    .f = function(speech_balloon, user, reply_users, channel, ts) {
       if (!speech_balloon) {
         return(TRUE)
+      } else if (is.na(ts)) {
+        return(TRUE)
+      } else if (all(is.na(reply_users))) {
+        return(TRUE)
+      } else if (any(reply_users == user)) {
+        # This is a stop-gap. Technically this could still be un-answerable
+        # if they aren't the *latest* reply. We should grab the replies for
+        # such posts and check, but maybe we'll grab them for *everything*.
+        last_reply_user <- slackthreads::replies(ts, channel) %>%
+          tibble::enframe() %>%
+          tidyr::unnest_wider(value) %>%
+          # dplyr::mutate(ts = as.numeric(ts)) %>%
+          dplyr::arrange(dplyr::desc(ts)) %>%
+          dplyr::slice(1) %>%
+          dplyr::pull(user)
+        return(last_reply_user == user)
       } else {
-        if (all(is.na(reply_users))) {
-          return(TRUE)
-        } else {
-          if (any(reply_users == user)) {
-            # This is a stop-gap. Technically this could still be un-answerable
-            # if they aren't the *latest* reply. We should grab the replies for
-            # such posts and check, but maybe we'll grab them for *everything*.
-            return(TRUE)
-          } else {
-            return(FALSE)
-          }
-        }
+        return(FALSE)
       }
     }
   )
