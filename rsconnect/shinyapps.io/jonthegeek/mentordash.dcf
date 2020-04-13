@@ -1,0 +1,12 @@
+name: mentordash
+title: mentordash
+username:
+account: jonthegeek
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2101114
+bundleId: 3006715
+url: https://jonthegeek.shinyapps.io/mentordash/
+when: 1586783776.23798
+asMultiple: FALSE
+asStatic: FALSE
