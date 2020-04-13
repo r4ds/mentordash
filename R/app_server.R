@@ -7,13 +7,17 @@
 .app_server <- function(input, output, session) {
   # CLEAN EVERYTHING UP TO ONLY DISPLAY WHEN QUESTIONS_DF SUCCEEDS.
 
+  question_channels <- shiny::reactive({
+    query <- shiny::getQueryString(session)
+    shiny::req(query$code)
+    .get_question_channels(code = query$code)
+  })
+
   questions_df <- shiny::eventReactive(
     input$refresh,
     {
-      query <- shiny::getQueryString(session)
-      shiny::req(query$code)
-      question_channels <- .get_question_channels(code = query$code)
-      .get_questions(question_channels)
+
+      .get_questions(question_channels())
     },
     ignoreNULL = FALSE
   )
