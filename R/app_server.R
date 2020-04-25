@@ -4,12 +4,23 @@
 #'
 #' @return Shiny reactive updates.
 #' @keywords internal
-.app_server <- function(input, output,session) {
-  question_channels <- .get_question_channels()
+.app_server <- function(input, output, session) {
+  # CLEAN EVERYTHING UP TO ONLY DISPLAY WHEN QUESTIONS_DF SUCCEEDS.
+
+  # root_url <- .detect_root_url(session)
+
+  question_channels <- shiny::reactive({
+    query <- shiny::getQueryString(session)
+    shiny::req(query$code)
+    .get_question_channels(code = query$code)
+  })
 
   questions_df <- shiny::eventReactive(
     input$refresh,
-    {.get_questions(question_channels)},
+    {
+
+      .get_questions(question_channels())
+    },
     ignoreNULL = FALSE
   )
 
@@ -20,7 +31,8 @@
 
   shinydashboard::valueBox(count_answerable,
                            subtitle = "Answerable Questions",
-                           icon = icon('hand-holding-heart'),
+                           # subtitle = root_url,
+                           icon = shiny::icon('hand-holding-heart'),
                            color = 'aqua')
   })
 
@@ -41,7 +53,7 @@
 
     shinydashboard::valueBox(count_followup,
                              subtitle = "Waiting for OP Followup",
-                             icon = icon('comment-dots'),
+                             icon = shiny::icon('comment-dots'),
                              color = 'teal')
   })
 
@@ -58,11 +70,13 @@
   # The button says "Please wait..." until everything loads.
   shiny::updateActionButton(session, inputId = "refresh", label = "Refresh")
 
-  session$onSessionEnded(shiny::stopApp)
+  # We used to auto-end when the session ends, but refreshing a browser window
+  # counts as "ending," and I want to allow that.
+  # session$onSessionEnded(shiny::stopApp)
 }
 
-.get_question_channels <- function() {
-  slackteams::load_team_dcf("R4ds")
+.get_question_channels <- function(code) {
+  slackteams::add_team_code(code, redirect_uri = root_url, verbose = FALSE)
   slackteams::activate_team("R4ds")
   channels <- slackteams::get_team_channels()
   question_channels <- sort(
@@ -143,27 +157,27 @@
               this_ts,
               sep = "/"
             ),
-            "\">Web</a>"
+            "\", target=\"_blank\">Web</a>"
           )
         }
       ),
-      `app link` = purrr::map2(
-        .data$channel_id, .data$ts,
-        function(chnl, this_ts) {
-          paste0(
-            "<a href=\"",
-            paste(
-              "https://rfordatascience.slack.com/archives",
-              chnl,
-              paste0("p", sub(x = this_ts, "\\.", "")),
-              sep = "/"
-            ),
-            "\">App</a>"
-          )
-        }
-      ),
+      # `app link` = purrr::map2(
+      #   .data$channel_id, .data$ts,
+      #   function(chnl, this_ts) {
+      #     paste0(
+      #       "<a href=\"",
+      #       paste(
+      #         "https://rfordatascience.slack.com/archives",
+      #         chnl,
+      #         paste0("p", sub(x = this_ts, "\\.", "")),
+      #         sep = "/"
+      #       ),
+      #       "\", target=\"_blank\">App</a>"
+      #     )
+      #   }
+      # ),
       excerpt = stringr::str_trunc(text,100),
-      links = paste(`web link`, `app link`, sep = " | "),
+      # links = paste(`web link`, `app link`, sep = " | "),
       latest_activity = as.POSIXct(
         purrr::map2_dbl(
           as.numeric(.data$ts), as.numeric(.data$latest_reply),
@@ -180,7 +194,8 @@
       .data$reply_count,
       .data$speech_balloon,
       .data$answerable,
-      .data$links,
+      .data$`web link`,
+      # .data$links,
       .data$latest_activity
     ) %>%
     dplyr::arrange(.data$latest_activity)
@@ -263,4 +278,13 @@
       }
     }
   )
+}
+
+# This will eventually be used to auto-set the return url for the login.
+.detect_root_url <- function(session) {
+  if (shiny::isolate(session$clientData$url_hostname) == "127.0.0.1") {
+    return("http://127.0.0.1:4242")
+  } else {
+    return("https://r4dscommunity.shinyapps.io/mentordash")
+  }
 }

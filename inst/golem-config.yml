@@ -1,0 +1,8 @@
+default:
+  golem_name: mentordash
+  golem_version: 0.1.5
+  app_prod: no
+production:
+  app_prod: yes
+dev:
+  golem_wd: !expr here::here()

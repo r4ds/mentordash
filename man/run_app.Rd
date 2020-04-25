@@ -4,7 +4,12 @@
 \alias{run_app}
 \title{Run the Shiny Application}
 \usage{
-run_app(...)
+run_app(force_browser = FALSE, ...)
+}
+\arguments{
+\item{force_browser}{A logical indicating whether to force the app to launch
+in a browser window. Useful for debugging toward a deployed version of this
+app.}
 }
 \description{
 This function launches a Shiny App to help R4DS Online Learning Community
