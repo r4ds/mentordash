@@ -7,6 +7,8 @@
 .app_server <- function(input, output, session) {
   # CLEAN EVERYTHING UP TO ONLY DISPLAY WHEN QUESTIONS_DF SUCCEEDS.
 
+  # root_url <- .detect_root_url(session)
+
   question_channels <- shiny::reactive({
     query <- shiny::getQueryString(session)
     shiny::req(query$code)
@@ -29,6 +31,7 @@
 
   shinydashboard::valueBox(count_answerable,
                            subtitle = "Answerable Questions",
+                           # subtitle = root_url,
                            icon = shiny::icon('hand-holding-heart'),
                            color = 'aqua')
   })
@@ -275,4 +278,13 @@
       }
     }
   )
+}
+
+# This will eventually be used to auto-set the return url for the login.
+.detect_root_url <- function(session) {
+  if (shiny::isolate(session$clientData$url_hostname) == "127.0.0.1") {
+    return("http://127.0.0.1:4242")
+  } else {
+    return("https://r4dscommunity.shinyapps.io/mentordash")
+  }
 }
