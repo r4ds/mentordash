@@ -3,14 +3,14 @@
 #' This function launches a Shiny App to help R4DS Online Learning Community
 #' mentors find unanswered questions.
 #'
-#' @param force_browser A logical indicating whether to force the app to launch
-#'   in a browser window. Useful for debugging toward a deployed version of this
-#'   app.
+#' @param local A logical indicating whether you are launching the app locally,
+#'   rather than on shinyapps.io. Useful for debugging toward a deployed version
+#'   of this app.
 #'
 #' @export
-run_app <- function(force_browser = FALSE, ...) {
+run_app <- function(local = FALSE, ...) {
   app <- shiny::shinyApp(ui = .ui_main, server = .app_server)
-  if (force_browser) {
+  if (local) {
     app$options$port <- 4242L
     app$options$launch.browser <- TRUE
   }
