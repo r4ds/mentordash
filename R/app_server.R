@@ -83,6 +83,7 @@
     grep('^help', channels$name[channels$is_channel], value = TRUE)
   )
   names(question_channels) <- question_channels
+  shiny::updateQueryString("?")
   return(question_channels)
 }
 
