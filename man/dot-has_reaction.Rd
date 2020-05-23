@@ -9,7 +9,8 @@
 \arguments{
 \item{reactions}{A list of reaction lists.}
 
-\item{reaction_name}{A character scalar with the name of the target reaction.}
+\item{reaction_name}{A character vector with the name of one or more target
+reactions.}
 }
 \value{
 A logical vector the same length as reactions.

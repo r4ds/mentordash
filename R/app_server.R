@@ -7,34 +7,53 @@
 .app_server <- function(input, output, session) {
   # CLEAN EVERYTHING UP TO ONLY DISPLAY WHEN QUESTIONS_DF SUCCEEDS.
 
+  # Right now it does a weird double refresh, likely because modules aren't set
+  # up properly. I'm merging to get things to a fixable state, though.
+
   # root_url <- .detect_root_url(session)
+  # output$login_button <- shiny::renderUI(
+  #   .login_button()
+  # )
+
+  query_string <- shiny::reactive(
+    shiny::getQueryString(session)
+  )
+
+  output$app_ui <- shiny::renderUI(
+    .ui_main()
+  )
 
   question_channels <- shiny::reactive({
-    query <- shiny::getQueryString(session)
-    shiny::req(query$code)
-    .get_question_channels(code = query$code)
+    # query <- shiny::getQueryString(session)
+    shiny::req(query_string()$code)
+    .get_question_channels(code = query_string()$code)
   })
 
   questions_df <- shiny::eventReactive(
     input$refresh,
-    {
-
-      .get_questions(question_channels())
-    },
+    .get_questions(question_channels()),
     ignoreNULL = FALSE
   )
 
-  output$valuebox_answerable <- shinydashboard::renderValueBox({
-    count_answerable <- questions_df() %>%
-      dplyr::filter(answerable) %>%
-      nrow()
-
-  shinydashboard::valueBox(count_answerable,
-                           subtitle = "Answerable Questions",
-                           # subtitle = root_url,
-                           icon = shiny::icon('hand-holding-heart'),
-                           color = 'aqua')
+  output$question_table <- shiny::renderUI({
+    shiny::req(questions_df())
+    .question_table_output()
   })
+
+  output$valuebox_answerable <- shinydashboard::renderValueBox(
+    {
+      count_answerable <- questions_df() %>%
+        dplyr::filter(answerable) %>%
+        nrow()
+
+      shinydashboard::valueBox(
+        count_answerable,
+        subtitle = "Answerable Questions",
+        icon = shiny::icon('hand-holding-heart'),
+        color = 'aqua'
+      )
+    }
+  )
 
   output$answerable_questions <- DT::renderDataTable({
     questions_df() %>%
@@ -67,23 +86,21 @@
                     escape = FALSE)
   })
 
-  # The button says "Please wait..." until everything loads.
-  shiny::updateActionButton(session, inputId = "refresh", label = "Refresh")
-
-  # We used to auto-end when the session ends, but refreshing a browser window
-  # counts as "ending," and I want to allow that.
-  # session$onSessionEnded(shiny::stopApp)
+  output$refresh <- shiny::renderUI({
+    shiny::req(questions_df())
+    .refresh_button_output()
+  })
 }
 
 .get_question_channels <- function(code) {
   slackteams::add_team_code(code, redirect_uri = root_url, verbose = FALSE)
+  shiny::updateQueryString("?")
   slackteams::activate_team("R4ds")
   channels <- slackteams::get_team_channels()
   question_channels <- sort(
     grep('^help', channels$name[channels$is_channel], value = TRUE)
   )
   names(question_channels) <- question_channels
-  shiny::updateQueryString("?")
   return(question_channels)
 }
 
@@ -135,12 +152,29 @@
       !(.data$subtype %in% bad_subtypes)
     ) %>%
     dplyr::mutate(
-      heavy_check_mark = .has_reaction(.data$reactions, "heavy_check_mark"),
-      thread_tag = .has_reaction(.data$reactions, "thread")
+      heavy_check_mark = .has_reaction(
+        .data$reactions,
+        c("heavy_check_mark", "question-answered")
+      ),
+      thread_tag = .has_reaction(
+        .data$reactions,
+        "thread"
+      ),
+      nevermind = .has_reaction(
+        .data$reactions,
+        c("question-nevermind", "octagonal_sign")
+      )
     ) %>%
-    dplyr::filter(!.data$heavy_check_mark, !.data$thread_tag) %>%
+    dplyr::filter(
+      !.data$heavy_check_mark,
+      !.data$thread_tag,
+      !.data$nevermind
+    ) %>%
     dplyr::mutate(
-      speech_balloon = .has_reaction(.data$reactions, "speech_balloon"),
+      speech_balloon = .has_reaction(
+        .data$reactions,
+        c("speech_balloon", "question-more-info")
+      ),
       answerable = .is_answerable(
         .data$speech_balloon, .data$user, .data$reply_users,
         channels = .data$channel, tses = .data$thread_ts
@@ -207,7 +241,8 @@
 #' Check for a Reaction in Reactions
 #'
 #' @param reactions A list of reaction lists.
-#' @param reaction_name A character scalar with the name of the target reaction.
+#' @param reaction_name A character vector with the name of one or more target
+#'   reactions.
 #'
 #' @return A logical vector the same length as reactions.
 #' @keywords internal
@@ -220,7 +255,7 @@
         purrr::map_lgl(
           rxns,
           function(rxn) {
-            rxn$name == reaction_name
+            rxn$name %in% reaction_name
           }
         )
       )

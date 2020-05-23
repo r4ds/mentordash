@@ -1,3 +1,7 @@
+.ui_dynamic <- function() {
+  shiny::uiOutput("app_ui")
+}
+
 #' The Main App UI
 #'
 #' @return A \code{\link[shiny]{tagList}} containing the UI.
@@ -31,17 +35,21 @@
 
     # MIGRATE THIS TO shinyslack
 
-    shiny::tags$li(
-      class = "dropdown",
-      shiny::tags$a(
-        href = slackteams::auth_url(
-          redirect_uri = root_url, team_code = "T6UC1DKJQ"
-        ),
-        shiny::tags$img(
-          src = "https://api.slack.com/img/sign_in_with_slack.png"
-        ),
-        style = "padding:5px;"
-      )
+    .login_button()
+  )
+}
+
+.login_button <- function() {
+  shiny::tags$li(
+    class = "dropdown",
+    shiny::tags$a(
+      href = slackteams::auth_url(
+        redirect_uri = root_url, team_code = "T6UC1DKJQ"
+      ),
+      shiny::tags$img(
+        src = "https://api.slack.com/img/sign_in_with_slack.png"
+      ),
+      style = "padding:5px;"
     )
   )
 }
@@ -51,16 +59,7 @@
 #' @return A \code{\link[shinydashboard]{dashboardSidebar}}.
 #' @keywords internal
 .ui_sidebar <- function() {
-  shinydashboard::dashboardSidebar(
-    collapsed = TRUE,
-    shiny::p(
-      paste(
-        "Eventually there will be menus here, for example to select channels",
-        "to include in the report. It takes a while to load the data, sorry."
-      ),
-      style = "padding:4px;"
-    )
-  )
+  shinydashboard::dashboardSidebar(disable = TRUE)
 }
 
 #' The Dashboard Body
@@ -69,36 +68,50 @@
 #' @keywords internal
 .ui_body <- function() {
   shinydashboard::dashboardBody(
+    # shiny::fluidRow(
+    #   style = 'padding-left:15px;padding-right:15px;',
+    #   shinydashboard::valueBoxOutput('valuebox_answerable'),
+    #   shinydashboard::valueBoxOutput('valuebox_followup')
+    # ) ,
+    # shiny::br(),
     shiny::fluidRow(
       style = 'padding-left:15px;padding-right:15px;',
       shinydashboard::valueBoxOutput('valuebox_answerable'),
       shinydashboard::valueBoxOutput('valuebox_followup')
     ),
     shiny::br(),
-    shinydashboard::tabBox(
-      width = 12,
-      id = 'questions_tabs',
-      title = "Questions",
-      side = 'right',
-      shiny::tabPanel(
-        title = "Answerable Questions",
-        value = "answerable",
-        DT::DTOutput('answerable_questions')
-      ),
-      shiny::tabPanel(
-        title = "Waiting for OP Followup",
-        value = "followup",
-        DT::DTOutput('followup_questions')
-      )
-    ),
+    shiny::uiOutput("question_table"),
     shiny::br(),
-    shiny::div(
-      style = "text-align:center;",
-      shiny::actionButton(
-        "refresh",
-        label = "Please wait...",
-        class = 'btn-primary'
-      )
+    shiny::uiOutput("refresh")
+  )
+}
+
+.question_table_output <- function() {
+  shinydashboard::tabBox(
+    width = 12,
+    id = 'questions_tabs',
+    title = "Questions",
+    side = 'right',
+    shiny::tabPanel(
+      title = "Answerable Questions",
+      value = "answerable",
+      DT::DTOutput('answerable_questions')
+    ),
+    shiny::tabPanel(
+      title = "Waiting for OP Followup",
+      value = "followup",
+      DT::DTOutput('followup_questions')
+    )
+  )
+}
+
+.refresh_button_output <- function() {
+  shiny::div(
+    style = "text-align:center;",
+    shiny::actionButton(
+      "refresh",
+      label = "Refresh",
+      class = 'btn-primary'
     )
   )
 }

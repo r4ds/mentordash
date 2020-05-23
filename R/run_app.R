@@ -9,7 +9,7 @@
 #'
 #' @export
 run_app <- function(local = FALSE, ...) {
-  app <- shiny::shinyApp(ui = .ui_main, server = .app_server)
+  app <- shiny::shinyApp(ui = .ui_dynamic, server = .app_server)
   if (local) {
     app$options$port <- 4242L
     app$options$launch.browser <- TRUE
