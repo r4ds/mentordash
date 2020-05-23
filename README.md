@@ -14,6 +14,8 @@ Online Learning Community](https://www.rfordatasci.com/). Thank you to
 [yonicd](https://github.com/yonicd/threads/) for a great deal of work in
 the threads package\!
 
+The dashboard is now [deployed](http://r4ds.io/mentordash)\!
+
 ## Installation
 
 You can install the released version of mentordash from
@@ -31,21 +33,11 @@ And the development version from [GitHub](https://github.com/) with:
 devtools::install_github("r4ds/mentordash")
 ```
 
-## Setup
-
-To run mentordash, you must first configure slackteams.
-
-1.  Follow the instructions in the [slackteams
-    README](https://github.com/yonicd/slackteams/blob/master/README.md).
-2.  Run `slackteams::load_teams`.
-3.  Run `slackteams::activate_team("r4ds")`.
-4.  Run `slackteams::activeteam2dcf()`.
-
 ## Example
 
 ``` r
 library(mentordash)
-run_app()
+run_app(local = TRUE)
 ```
 
 ## Contributing

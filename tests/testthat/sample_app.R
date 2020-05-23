@@ -1,2 +1,2 @@
 library(mentordash)
-run_app(force_browser = TRUE)
+run_app(local = TRUE)
