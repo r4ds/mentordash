@@ -2,6 +2,27 @@
   shiny::uiOutput("app_ui")
 }
 
+.ui_login <- function() {
+  shiny::fluidPage(
+    title = "R4DS Mentor Tool",
+    shiny::fluidRow(
+      shiny::tags$a(
+        href = slackteams::auth_url(
+          redirect_uri = root_url, team_code = "T6UC1DKJQ"
+        ),
+        shiny::tags$img(
+          src = "https://api.slack.com/img/sign_in_with_slack.png"
+        ),
+        style = "padding:25px;"
+      )
+    )
+  )
+  #
+  # shiny::tagList(
+  #   .login_button()
+  # )
+}
+
 #' The Main App UI
 #'
 #' @return A \code{\link[shiny]{tagList}} containing the UI.
@@ -68,21 +89,18 @@
 #' @keywords internal
 .ui_body <- function() {
   shinydashboard::dashboardBody(
+    shiny::fluidRow(
+      shiny::verbatimTextOutput("testing")
+    )
     # shiny::fluidRow(
     #   style = 'padding-left:15px;padding-right:15px;',
     #   shinydashboard::valueBoxOutput('valuebox_answerable'),
     #   shinydashboard::valueBoxOutput('valuebox_followup')
-    # ) ,
+    # ),
     # shiny::br(),
-    shiny::fluidRow(
-      style = 'padding-left:15px;padding-right:15px;',
-      shinydashboard::valueBoxOutput('valuebox_answerable'),
-      shinydashboard::valueBoxOutput('valuebox_followup')
-    ),
-    shiny::br(),
-    shiny::uiOutput("question_table"),
-    shiny::br(),
-    shiny::uiOutput("refresh")
+    # shiny::uiOutput("question_table"),
+    # shiny::br(),
+    # shiny::uiOutput("refresh")
   )
 }
 
