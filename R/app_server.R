@@ -335,12 +335,3 @@
 
   return(answerable)
 }
-
-# This will eventually be used to auto-set the return url for the login.
-.detect_root_url <- function(session) {
-  if (shiny::isolate(session$clientData$url_hostname) == "127.0.0.1") {
-    return("http://127.0.0.1:4242")
-  } else {
-    return("https://r4dscommunity.shinyapps.io/mentordash")
-  }
-}
