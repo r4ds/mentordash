@@ -17,24 +17,28 @@ Imports:
     dplyr,
     DT,
     golem (>= 0.2.1),
+    httpuv,
     lubridate,
     magrittr,
     purrr,
     rlang,
     shiny (>= 1.5.0),
+    shinycookie,
     shinydashboard,
     slackteams (>= 0.2.1),
     slackthreads (>= 0.0.1),
+    stats,
     stringr,
     tibble,
     tidyr (>= 1.0.0),
     pkgload
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 URL: https://github.com/r4ds/mentordash
 BugReports: https://github.com/r4ds/mentordash/issues
 Suggests: 
     testthat
 Remotes: 
+    colearendt/shinycookie,
     yonicd/slackteams,
     yonicd/slackthreads
 Depends: 
