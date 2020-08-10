@@ -2,7 +2,7 @@
 #'
 #' @return A \code{\link[shiny]{tagList}} containing the UI.
 #' @keywords internal
-.main_ui <- function() {
+.app_ui <- function() {
   dashboard_title <- "R4DS Mentor Tool"
   shinydashboard::dashboardPage(
     header = .ui_header(dashboard_title),
@@ -41,12 +41,12 @@
       shinycookie::initShinyCookie("shinycookie")
     ),
     shiny::fluidRow(
-      style = 'padding-left:15px;padding-right:15px;',
-      shinydashboard::valueBoxOutput('valuebox_answerable'),
-      shinydashboard::valueBoxOutput('valuebox_followup')
+      style = "padding-left:15px;padding-right:15px;",
+      shinydashboard::valueBoxOutput("valuebox_answerable"),
+      shinydashboard::valueBoxOutput("valuebox_followup")
     ),
     shiny::fluidRow(
-      style = 'padding-left:15px;padding-right:15px;',
+      style = "padding-left:15px;padding-right:15px;",
       # shiny::uiOutput("question_table"),
       .question_table_output(),
       shiny::br(),
@@ -58,18 +58,18 @@
 .question_table_output <- function() {
   shinydashboard::tabBox(
     width = 12,
-    id = 'questions_tabs',
+    id = "questions_tabs",
     title = "Questions",
-    side = 'right',
+    side = "right",
     shiny::tabPanel(
       title = "Answerable Questions",
       value = "answerable",
-      DT::DTOutput('answerable_questions')
+      DT::DTOutput("answerable_questions")
     ),
     shiny::tabPanel(
       title = "Waiting for OP Followup",
       value = "followup",
-      DT::DTOutput('followup_questions')
+      DT::DTOutput("followup_questions")
     )
   )
 }
@@ -80,7 +80,7 @@
     shiny::actionButton(
       "refresh",
       label = "loading, please wait...",
-      class = 'btn-primary'
+      class = "btn-primary"
     )
   )
 }

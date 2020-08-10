@@ -88,7 +88,9 @@
 
 .parse_cookies <- function(cookies) {
   # Based on shiny::parseQueryString
-  if (is.null(cookies) || nchar(cookies) == 0) return(NULL)
+  if (is.null(cookies) || nchar(cookies) == 0) {
+    return(NULL)
+  }
   pairs <- strsplit(cookies, "; ", fixed = TRUE)[[1]]
   pairs <- pairs[pairs != ""]
   pairs <- strsplit(pairs, "=", fixed = TRUE)

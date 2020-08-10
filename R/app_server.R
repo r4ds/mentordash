@@ -46,8 +46,8 @@
     shinydashboard::valueBox(
       count_answerable,
       subtitle = "Answerable Questions",
-      icon = shiny::icon('hand-holding-heart'),
-      color = 'aqua'
+      icon = shiny::icon("hand-holding-heart"),
+      color = "aqua"
     )
   })
 
@@ -60,8 +60,8 @@
     shinydashboard::valueBox(
       count_followup,
       subtitle = "Waiting for OP Followup",
-      icon = shiny::icon('comment-dots'),
-      color = 'teal'
+      icon = shiny::icon("comment-dots"),
+      color = "teal"
     )
   })
 
@@ -78,7 +78,7 @@
       DT::datatable(
         rownames = FALSE,
         # filter = 'top',
-        selection = 'single',
+        selection = "single",
         escape = FALSE
       )
   })
@@ -90,7 +90,7 @@
       DT::datatable(
         rownames = FALSE,
         # filter = 'top',
-        selection = 'single',
+        selection = "single",
         escape = FALSE
       )
   })
@@ -99,7 +99,7 @@
 .get_question_channels <- function() {
   channels <- slackteams::get_team_channels()
   question_channels <- sort(
-    grep('^help', channels$name[channels$is_channel], value = TRUE)
+    grep("^help", channels$name[channels$is_channel], value = TRUE)
   )
   names(question_channels) <- question_channels
   return(question_channels)
@@ -230,9 +230,9 @@
       #     )
       #   }
       # ),
-      excerpt = stringr::str_trunc(text,100),
+      excerpt = stringr::str_trunc(text, 100),
       # links = paste(`web link`, `app link`, sep = " | "),
-      latest_activity = format(latest_activity,"%Y-%m-%d %H:%M:%S")
+      latest_activity = format(latest_activity, "%Y-%m-%d %H:%M:%S")
     ) %>%
     dplyr::select(
       .data$channel,
@@ -307,7 +307,7 @@
   # actually get triggered.
   answerable[!answerable] <- purrr::map_lgl(
     reply_userses[!answerable],
-    ~!as.logical(length(.x))
+    ~ !as.logical(length(.x))
   )
 
   # We need to check if the op was the *most recent* reply. This can be slow.

@@ -5,7 +5,7 @@ slackteams::load_teams()
 slackteams::activate_team("r4ds")
 channels <- slackteams::get_team_channels()
 question_channels <- sort(
-  grep('^help', channels$name[channels$is_channel], value = TRUE)
+  grep("^help", channels$name[channels$is_channel], value = TRUE)
 )
 names(question_channels) <- question_channels
 
@@ -45,7 +45,7 @@ convos_tbl <- purrr::map_dfr(
       as.numeric(.data$ts),
       origin = "1970-01-01"
     ),
-    posted_at = format(posted_at,"%Y-%m-%d %H:%M:%S")
+    posted_at = format(posted_at, "%Y-%m-%d %H:%M:%S")
   )
 
 # convos_tbl %>%
