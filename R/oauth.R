@@ -25,8 +25,8 @@
         stop("ui must be a tagList or a function.")
       }
     } else if (.has_auth_code(request)) {
-      code <- .extract_auth_code(request)
       redirect_uri <- .construct_redirect_uri(request)
+      # Change this to a promises call.
       token <- slackteams::add_team_code(
         code = .extract_auth_code(request),
         redirect_uri = redirect_uri
