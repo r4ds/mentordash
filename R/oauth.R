@@ -129,6 +129,8 @@
     )[[1]]
     redirect_uri <- paste0(redirect_uri, extra_info)
   }
+  # Hack to get it to work on shinyapps for now.
+  redirect_uri <- "https://r4dscommunity.shinyapps.io/mentordash/"
   return(redirect_uri)
 }
 
