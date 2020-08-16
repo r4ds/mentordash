@@ -5,100 +5,101 @@
 #' @return Shiny reactive updates.
 #' @keywords internal
 .app_server <- function(input, output, session) {
-  # CLEAN EVERYTHING UP TO ONLY DISPLAY WHEN QUESTIONS_DF SUCCEEDS.
+  # If they get to the actual shiny app, there's either a code in the URL or a
+  # cookie with the Slack token. Even if there's a code in the URL, check the
+  # cookie first. Note: The cookie and code are static (they can't change during
+  # a given session in a meaningful way).
 
-  # Right now it does a weird double refresh, likely because modules aren't set
-  # up properly. I'm merging to get things to a fixable state, though.
-
-  # root_url <- .detect_root_url(session)
-  # output$login_button <- shiny::renderUI(
-  #   .login_button()
-  # )
-
-  query_string <- shiny::reactive(
-    shiny::getQueryString(session)
-  )
-
-  output$app_ui <- shiny::renderUI(
-    .ui_main()
-  )
+  is_logged_in <- .team_loaded(input$shinycookie$r4ds_slack_token)
 
   question_channels <- shiny::reactive({
-    # query <- shiny::getQueryString(session)
-    shiny::req(query_string()$code)
-    .get_question_channels(code = query_string()$code)
+    shiny::req(is_logged_in())
+    .get_question_channels()
   })
 
   questions_df <- shiny::eventReactive(
     input$refresh,
-    .get_questions(question_channels()),
+    {
+      shiny::req(question_channels())
+      .get_questions(question_channels())
+    },
     ignoreNULL = FALSE
   )
 
-  output$question_table <- shiny::renderUI({
-    shiny::req(questions_df())
-    .question_table_output()
-  })
-
-  output$valuebox_answerable <- shinydashboard::renderValueBox(
-    {
-      count_answerable <- questions_df() %>%
-        dplyr::filter(answerable) %>%
-        nrow()
-
-      shinydashboard::valueBox(
-        count_answerable,
-        subtitle = "Answerable Questions",
-        icon = shiny::icon('hand-holding-heart'),
-        color = 'aqua'
-      )
-    }
+  # Once the questions_df loads, update the "Refresh" button to say "Refresh".
+  shiny::observeEvent(
+    questions_df(),
+    shiny::updateActionButton(
+      session,
+      "refresh",
+      label = "Refresh"
+    ),
+    once = TRUE
   )
 
-  output$answerable_questions <- DT::renderDataTable({
-    questions_df() %>%
-      dplyr::filter(answerable) %>%
-      dplyr::select(-answerable,-speech_balloon) %>%
-      DT::datatable(rownames = FALSE,
-                    # filter = 'top',
-                    selection = 'single',
-                    escape = FALSE)
-    })
+  output$valuebox_answerable <- shinydashboard::renderValueBox({
+    shiny::req(questions_df())
+    count_answerable <- nrow(
+      dplyr::filter(questions_df(), .data$answerable)
+    )
+
+    shinydashboard::valueBox(
+      count_answerable,
+      subtitle = "Answerable Questions",
+      icon = shiny::icon("hand-holding-heart"),
+      color = "aqua"
+    )
+  })
 
   output$valuebox_followup <- shinydashboard::renderValueBox({
-    count_followup <- questions_df() %>%
-      dplyr::filter(!answerable) %>%
-      nrow()
+    shiny::req(questions_df())
+    count_followup <- nrow(
+      dplyr::filter(questions_df(), !.data$answerable)
+    )
 
-    shinydashboard::valueBox(count_followup,
-                             subtitle = "Waiting for OP Followup",
-                             icon = shiny::icon('comment-dots'),
-                             color = 'teal')
+    shinydashboard::valueBox(
+      count_followup,
+      subtitle = "Waiting for OP Followup",
+      icon = shiny::icon("comment-dots"),
+      color = "teal"
+    )
+  })
+
+  # output$question_table <- shiny::renderUI({
+  #   shiny::req(questions_df())
+  #   .question_table_output()
+  # })
+
+  output$answerable_questions <- DT::renderDataTable({
+    shiny::req(questions_df())
+    questions_df() %>%
+      dplyr::filter(.data$answerable) %>%
+      dplyr::select(-"answerable", -"speech_balloon") %>%
+      DT::datatable(
+        rownames = FALSE,
+        # filter = 'top',
+        selection = "single",
+        escape = FALSE
+      )
   })
 
   output$followup_questions <- DT::renderDataTable({
     questions_df() %>%
-      dplyr::filter(!answerable) %>%
-      dplyr::select(-answerable,-speech_balloon) %>%
-      DT::datatable(rownames = FALSE,
-                    # filter = 'top',
-                    selection = 'single',
-                    escape = FALSE)
-  })
-
-  output$refresh <- shiny::renderUI({
-    shiny::req(questions_df())
-    .refresh_button_output()
+      dplyr::filter(!.data$answerable) %>%
+      dplyr::select(-"answerable", -"speech_balloon") %>%
+      DT::datatable(
+        rownames = FALSE,
+        # filter = 'top',
+        selection = "single",
+        escape = FALSE
+      )
   })
 }
 
-.get_question_channels <- function(code) {
-  slackteams::add_team_code(code, redirect_uri = root_url, verbose = FALSE)
-  shiny::updateQueryString("?")
-  slackteams::activate_team("R4ds")
+.get_question_channels <- function() {
   channels <- slackteams::get_team_channels()
   question_channels <- sort(
-    grep('^help', channels$name[channels$is_channel], value = TRUE)
+    grep("^help", channels$name[channels$is_channel], value = TRUE)
   )
   names(question_channels) <- question_channels
   return(question_channels)
@@ -133,6 +134,7 @@
   # explicit filters.
 
   bad_subtypes <- c("channel_join", "channel_name", "bot_add", "bot_message")
+  keep_timeframe <- lubridate::weeks(3)
 
   convos_tbl <- purrr::map_dfr(
     convos,
@@ -149,7 +151,22 @@
     tidyr::unnest_wider(.data$conversations) %>%
     # Get rid of channel_join and channel_name.
     dplyr::filter(
-      !(.data$subtype %in% bad_subtypes)
+      !(.data$subtype %in% bad_subtypes),
+      .data$user != "USLACKBOT"
+    ) %>%
+    # Only keep "recent" threads.
+    dplyr::mutate(
+      latest_activity = as.POSIXct(
+        purrr::map2_dbl(
+          as.numeric(.data$ts), as.numeric(.data$latest_reply),
+          max,
+          na.rm = TRUE
+        ),
+        origin = "1970-01-01"
+      )
+    ) %>%
+    dplyr::filter(
+      latest_activity >= (lubridate::now() - keep_timeframe)
     ) %>%
     dplyr::mutate(
       heavy_check_mark = .has_reaction(
@@ -180,6 +197,8 @@
         channels = .data$channel, tses = .data$thread_ts
       )
     ) %>%
+    # Seeing if dumping "waiting for op followup" here speeds things up.
+    # dplyr::filter(answerable) %>%
     dplyr::mutate(
       `web link` = purrr::map2(
         .data$channel_id, .data$ts,
@@ -211,17 +230,9 @@
       #     )
       #   }
       # ),
-      excerpt = stringr::str_trunc(text,100),
+      excerpt = stringr::str_trunc(text, 100),
       # links = paste(`web link`, `app link`, sep = " | "),
-      latest_activity = as.POSIXct(
-        purrr::map2_dbl(
-          as.numeric(.data$ts), as.numeric(.data$latest_reply),
-          max,
-          na.rm = TRUE
-        ),
-        origin = "1970-01-01"
-      ),
-      latest_activity = format(latest_activity,"%Y-%m-%d %H:%M:%S")
+      latest_activity = format(latest_activity, "%Y-%m-%d %H:%M:%S")
     ) %>%
     dplyr::select(
       .data$channel,
@@ -282,29 +293,36 @@
                            reply_userses,
                            channels,
                            tses) {
-  purrr::pmap_lgl(
+  # We need to return a logical vector indicating whether this question is
+  # "answerable", meaning the thread hasn't been tagged as needing more info OR
+  # there isn't a reply OR the latest reply was by the user. To determine the
+  # latest reply, we need to do an extra slack call, so try to do that as little
+  # as possible. And try to vectorize this cleanly.
+
+  answerable <- !speech_balloons | is.na(tses)
+
+  # Test the FALSEs.
+
+  # If there aren't any reply_users, it's answerable. This... shouldn't ever
+  # actually get triggered.
+  answerable[!answerable] <- purrr::map_lgl(
+    reply_userses[!answerable],
+    ~ !as.logical(length(.x))
+  )
+
+  # We need to check if the op was the *most recent* reply. This can be slow.
+  answerable[!answerable] <- purrr::pmap_lgl(
     .l = list(
-      speech_balloon = speech_balloons,
-      user = users,
-      reply_users = reply_userses,
-      channel = channels,
-      ts = tses
+      ts = tses[!answerable],
+      channel = channels[!answerable],
+      user = users[!answerable],
+      reply_users = reply_userses[!answerable]
     ),
-    .f = function(speech_balloon, user, reply_users, channel, ts) {
-      if (!speech_balloon) {
-        return(TRUE)
-      } else if (is.na(ts)) {
-        return(TRUE)
-      } else if (all(is.na(reply_users))) {
-        return(TRUE)
-      } else if (any(reply_users == user)) {
-        # This is a stop-gap. Technically this could still be un-answerable
-        # if they aren't the *latest* reply. We should grab the replies for
-        # such posts and check, but maybe we'll grab them for *everything*.
+    .f = function(ts, channel, user, reply_users) {
+      if (user %in% reply_users) {
         last_reply_user <- slackthreads::replies(ts, channel) %>%
           tibble::enframe() %>%
           tidyr::unnest_wider(value) %>%
-          # dplyr::mutate(ts = as.numeric(ts)) %>%
           dplyr::arrange(dplyr::desc(ts)) %>%
           dplyr::slice(1) %>%
           dplyr::pull(user)
@@ -314,13 +332,6 @@
       }
     }
   )
-}
 
-# This will eventually be used to auto-set the return url for the login.
-.detect_root_url <- function(session) {
-  if (shiny::isolate(session$clientData$url_hostname) == "127.0.0.1") {
-    return("http://127.0.0.1:4242")
-  } else {
-    return("https://r4dscommunity.shinyapps.io/mentordash")
-  }
+  return(answerable)
 }
