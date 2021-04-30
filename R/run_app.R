@@ -10,7 +10,7 @@
 #' @export
 run_app <- function(local = FALSE, ...) {
   app <- shiny::shinyApp(
-    ui = .slack_shiny_ui(.app_ui),
+    ui = .slack_shiny_ui(.app_ui, team = "T6UC1DKJQ"),
     server = .app_server
   )
   if (local) {

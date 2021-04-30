@@ -7,10 +7,12 @@
 #' @return A function defining the UI of a Shiny app (either with login or
 #'   without).
 #' @keywords internal
-.slack_shiny_ui <- function(ui) {
+.slack_shiny_ui <- function(ui, team = "T6UC1DKJQ") {
   force(ui)
   function(request) {
-    if (.has_cookie_token(request)) {
+    if (.has_token(request)) {
+      # Case 1: They already have a token. In this case we return the actual ui.
+
       # ui can be a tagList, a 0-argument function, or a 1-argument function.
       # Deal with that.
       if (is.list(ui)) {
@@ -25,8 +27,16 @@
         stop("ui must be a tagList or a function.")
       }
     } else if (.has_auth_code(request)) {
+      # Case 2: They are returning from the oauth endpoint, which has granted
+      # them authorization. The url will now have a `code` parameter.
+
+      # Do the call to the access url to exchange the code for a token, then
+      # save that token in a cookie and redirect them to the base url of this
+      # site. If they don't allow you to save a cookie, put the token in the url
+      # as a parameter. 100% of this should occur in javascript. Show a GDPR
+      # thing on this screen, just use the oauth_token parameter in the URL if
+      # they don't accept.
       redirect_uri <- .construct_redirect_uri(request)
-      # Change this to a promises call.
       token <- slackteams::add_team_code(
         code = .extract_auth_code(request),
         redirect_uri = redirect_uri
@@ -50,10 +60,27 @@
         )
       )
     } else {
-      # I should grab state if it exists, and pass it through.
+      # Case 3: They have neither a token nor a code to exchange for a token.
+
+      # The call to this function should include an auth_url, minus the
+      # redirect_uri. We should grab state if it's in the request url, but the
+      # rest should come from the user of this function. We just need to add
+      # redirect_uri and state and then location.replace to go there.
+
+      # Maybe take similar arguments as httr::oauth2.0_token? Simpler, though,
+      # 'cuz I'm way more opinionated. These are the things I need:
+
+      # auth_url
+      # access_url
+      # client_id
+      # client_secret
+      # scopes
+      # dots (additional named parameters)
+      # maybe set_cookie and cookie_timeout
       auth_url <- slackteams::auth_url(
+        scopes = slackteams::load_scopes(which = "slackverse"),
         redirect_uri = .construct_redirect_uri(request),
-        team_code = "T6UC1DKJQ"
+        team_code = team
       )
       return(
         shiny::tags$script(
@@ -64,6 +91,18 @@
       )
     }
   }
+}
+
+.has_token <- function(request) {
+  .has_cookie_token(request) | .has_url_token(request)
+}
+
+.has_url_token <- function(request) {
+  !is.null(.extract_url_token(request))
+}
+
+.extract_url_token <- function(request) {
+  shiny::parseQueryString(request$QUERY_STRING)$oauth_token
 }
 
 .has_auth_code <- function(request) {
@@ -106,18 +145,12 @@
 }
 
 .construct_redirect_uri <- function(request) {
-  # if (request$SERVER_NAME == "127.0.0.1") {
-  #   host <- "localhost"
-  # }
-  # else {
-  host <- request$SERVER_NAME
-  # }
+  # Using HTTP_HOST is better but still isn't solving the problem on shinyapps.
+  host <- request$HTTP_HOST
   redirect_uri <- paste0(
     request$rook.url_scheme,
     "://",
-    host,
-    ":",
-    request$SERVER_PORT
+    host
   )
   if (request$PATH_INFO != "/") {
     # We want things that come before any ?, not after.
