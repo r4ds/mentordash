@@ -97,7 +97,7 @@
 }
 
 .get_question_channels <- function() {
-  channels <- slackteams::get_team_channels()
+  channels <- slackteams:::get_conversations_list(type = "public_channel")
   question_channels <- sort(
     grep("^help", channels$name[channels$is_channel], value = TRUE)
   )
@@ -111,9 +111,12 @@
 #' @keywords internal
 .get_questions <- function(question_channels) {
   ## Read in Conversations ----
+  total_results <- 100L
   convos <- purrr::map(
     question_channels,
-    slackthreads::conversations
+    slackthreads::conversations,
+    max_results = total_results,
+    limit = min(total_results, 1000L)
   )
 
   ## Response to Tibble ----
@@ -148,7 +151,29 @@
     },
     .id = "channel"
   ) %>%
-    tidyr::unnest_wider(.data$conversations) %>%
+    tidyr::unnest_wider(.data$conversations)
+
+  # Add any missing, expected columns.
+  if (!("subtype" %in% colnames(convos_tbl))) {
+    convos_tbl$subtype <- ""
+  }
+  if (!("latest_reply" %in% colnames(convos_tbl))) {
+    convos_tbl$latest_reply <- NA_character_
+  }
+  if (!("reactions" %in% colnames(convos_tbl))) {
+    convos_tbl$reactions <- NA_character_
+  }
+  if (!("reply_users" %in% colnames(convos_tbl))) {
+    convos_tbl$reply_users <- NA_character_
+  }
+  if (!("thread_ts" %in% colnames(convos_tbl))) {
+    convos_tbl$thread_ts <- NA_character_
+  }
+  if (!("reply_count" %in% colnames(convos_tbl))) {
+    convos_tbl$reply_count <- 0L
+  }
+
+  convos_tbl <- convos_tbl %>%
     # Get rid of channel_join and channel_name.
     dplyr::filter(
       !(.data$subtype %in% bad_subtypes),
@@ -171,7 +196,7 @@
     dplyr::mutate(
       heavy_check_mark = .has_reaction(
         .data$reactions,
-        c("heavy_check_mark", "question-answered")
+        c("heavy_check_mark", "question-answered", "white_check_mark")
       ),
       thread_tag = .has_reaction(
         .data$reactions,
