@@ -164,6 +164,9 @@
       "reply_users",
       "thread_ts",
       "text"
+    ) %>%
+    dplyr::mutate(
+      reply_count = tidyr::replace_na(.data$reply_count, 0)
     )
 
   convos_tbl <- convos_tbl %>%
