@@ -1,13 +1,16 @@
+#' Require SLACK login to a Shiny app
+#'
 #' If the user hasn't logged in yet, return the login page. Otherwise return the
 #' actual ui.
 #'
 #' @param ui A function defining the UI of the Shiny app, or a
 #'   \code{\link[shiny]{tagList}}.
+#' @param team A Slack team ID for which the user should be authenticated.
 #'
 #' @return A function defining the UI of a Shiny app (either with login or
 #'   without).
 #' @keywords internal
-.slack_shiny_ui <- function(ui, team = "T6UC1DKJQ") {
+.slack_shiny_ui <- function(ui, team) {
   force(ui)
   function(request) {
     if (.has_token(request)) {
@@ -47,7 +50,11 @@
           shiny::tags$script(
             shiny::HTML(
               sprintf(
-                "Cookies.set('r4ds_slack_token', '%s', { expires: 90 });",
+                paste0(
+                  "Cookies.set('",
+                  cookie_name,
+                  "', '%s', { expires: 90 });"
+                ),
                 token
               )
             )
@@ -122,7 +129,7 @@
 }
 
 .extract_cookie_token <- function(request) {
-  .parse_cookies(request$HTTP_COOKIE)$r4ds_slack_token
+  .parse_cookies(request$HTTP_COOKIE)[cookie_name]
 }
 
 .parse_cookies <- function(cookies) {

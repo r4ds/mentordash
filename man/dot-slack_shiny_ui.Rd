@@ -2,14 +2,15 @@
 % Please edit documentation in R/oauth.R
 \name{.slack_shiny_ui}
 \alias{.slack_shiny_ui}
-\title{If the user hasn't logged in yet, return the login page. Otherwise return the
-actual ui.}
+\title{Require SLACK login to a Shiny app}
 \usage{
-.slack_shiny_ui(ui)
+.slack_shiny_ui(ui, team)
 }
 \arguments{
 \item{ui}{A function defining the UI of the Shiny app, or a
 \code{\link[shiny]{tagList}}.}
+
+\item{team}{A Slack team ID for which the user should be authenticated.}
 }
 \value{
 A function defining the UI of a Shiny app (either with login or
