@@ -1,5 +1,5 @@
 cookie_name <- "r4ds_slack_token"
-team_name <- "R4ds"
+team_name <- "R4DS Online Learning Community"
 dashboard_name <- "R4DS Mentor Tool"
 production_site_url <- "https://r4dscommunity.shinyapps.io/mentordash/"
 

@@ -129,7 +129,13 @@
 }
 
 .extract_cookie_token <- function(request) {
-  .parse_cookies(request$HTTP_COOKIE)[cookie_name]
+  cookies <- .parse_cookies(request$HTTP_COOKIE)
+
+  if (length(cookies) && cookie_name %in% names(cookies)) {
+    return(cookies[cookie_name])
+  } else {
+    return(NULL)
+  }
 }
 
 .parse_cookies <- function(cookies) {
