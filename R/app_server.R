@@ -10,7 +10,7 @@
   # cookie first. Note: The cookie and code are static (they can't change during
   # a given session in a meaningful way).
 
-  is_logged_in <- .team_loaded(input$shinycookie$r4ds_slack_token)
+  is_logged_in <- .team_loaded(input$shinycookie[cookie_name])
 
   question_channels <- shiny::reactive({
     shiny::req(is_logged_in())
@@ -105,7 +105,7 @@
   return(question_channels)
 }
 
-#' Get R4DS Question Threads
+#' Get Question Threads
 #'
 #' @return A tidy tibble of question information.
 #' @keywords internal
@@ -151,27 +151,20 @@
     },
     .id = "channel"
   ) %>%
-    tidyr::unnest_wider(.data$conversations)
-
-  # Add any missing, expected columns.
-  if (!("subtype" %in% colnames(convos_tbl))) {
-    convos_tbl$subtype <- ""
-  }
-  if (!("latest_reply" %in% colnames(convos_tbl))) {
-    convos_tbl$latest_reply <- NA_character_
-  }
-  if (!("reactions" %in% colnames(convos_tbl))) {
-    convos_tbl$reactions <- NA_character_
-  }
-  if (!("reply_users" %in% colnames(convos_tbl))) {
-    convos_tbl$reply_users <- NA_character_
-  }
-  if (!("thread_ts" %in% colnames(convos_tbl))) {
-    convos_tbl$thread_ts <- NA_character_
-  }
-  if (!("reply_count" %in% colnames(convos_tbl))) {
-    convos_tbl$reply_count <- 0L
-  }
+    # A general unnest_wider was breaking, so let's just get the channels we
+    # care about.
+    tidyr::hoist(
+      .data$conversations,
+      "ts",
+      "user",
+      "subtype",
+      "latest_reply",
+      "reactions",
+      "reply_count",
+      "reply_users",
+      "thread_ts",
+      "text"
+    )
 
   convos_tbl <- convos_tbl %>%
     # Get rid of channel_join and channel_name.
@@ -204,7 +197,7 @@
       ),
       nevermind = .has_reaction(
         .data$reactions,
-        c("question-nevermind", "octagonal_sign")
+        c("question-nevermind", "octagonal_sign", "nevermind")
       )
     ) %>%
     dplyr::filter(
@@ -347,7 +340,7 @@
       if (user %in% reply_users) {
         last_reply_user <- slackthreads::replies(ts, channel) %>%
           tibble::enframe() %>%
-          tidyr::unnest_wider(value) %>%
+          tidyr::hoist(value, "ts", "user") %>%
           dplyr::arrange(dplyr::desc(ts)) %>%
           dplyr::slice(1) %>%
           dplyr::pull(user)

@@ -1,13 +1,17 @@
+#' Require Slack login to a Shiny app
+#'
 #' If the user hasn't logged in yet, return the login page. Otherwise return the
 #' actual ui.
 #'
 #' @param ui A function defining the UI of the Shiny app, or a
 #'   \code{\link[shiny]{tagList}}.
+#' @param team A Slack team ID for which the user should be authenticated.
+#' @param site_url The URL of the Shiny app.
 #'
 #' @return A function defining the UI of a Shiny app (either with login or
 #'   without).
 #' @keywords internal
-.slack_shiny_ui <- function(ui, team = "T6UC1DKJQ") {
+.slack_shiny_ui <- function(ui, team, site_url) {
   force(ui)
   function(request) {
     if (.has_token(request)) {
@@ -36,10 +40,9 @@
       # as a parameter. 100% of this should occur in javascript. Show a GDPR
       # thing on this screen, just use the oauth_token parameter in the URL if
       # they don't accept.
-      redirect_uri <- .construct_redirect_uri(request)
       token <- slackteams::add_team_code(
         code = .extract_auth_code(request),
-        redirect_uri = redirect_uri
+        redirect_uri = site_url
       )
       return(
         shiny::tagList(
@@ -47,14 +50,18 @@
           shiny::tags$script(
             shiny::HTML(
               sprintf(
-                "Cookies.set('r4ds_slack_token', '%s', { expires: 90 });",
+                paste0(
+                  "Cookies.set('",
+                  cookie_name,
+                  "', '%s', { expires: 90 });"
+                ),
                 token
               )
             )
           ),
           shiny::tags$script(
             shiny::HTML(
-              sprintf("location.replace('%s');", redirect_uri)
+              sprintf("location.replace('%s');", site_url)
             )
           )
         )
@@ -79,7 +86,7 @@
       # maybe set_cookie and cookie_timeout
       auth_url <- slackteams::auth_url(
         scopes = slackteams::load_scopes(which = "slackverse"),
-        redirect_uri = .construct_redirect_uri(request),
+        redirect_uri = site_url,
         team_code = team
       )
       return(
@@ -122,7 +129,13 @@
 }
 
 .extract_cookie_token <- function(request) {
-  .parse_cookies(request$HTTP_COOKIE)$r4ds_slack_token
+  cookies <- .parse_cookies(request$HTTP_COOKIE)
+
+  if (length(cookies) && cookie_name %in% names(cookies)) {
+    return(cookies[cookie_name])
+  } else {
+    return(NULL)
+  }
 }
 
 .parse_cookies <- function(cookies) {
@@ -144,33 +157,33 @@
   return(res)
 }
 
-.construct_redirect_uri <- function(request) {
-  # Using HTTP_HOST is better but still isn't solving the problem on shinyapps.
-  host <- request$HTTP_HOST
-  redirect_uri <- paste0(
-    request$rook.url_scheme,
-    "://",
-    host
-  )
-  if (request$PATH_INFO != "/") {
-    # We want things that come before any ?, not after.
-    extra_info <- unlist(
-      strsplit(
-        x = request$PATH_INFO,
-        split = "\\?"
-      )
-    )[[1]]
-    redirect_uri <- paste0(redirect_uri, extra_info)
-  }
-  # Hack to get it to work on shinyapps for now.
-  redirect_uri <- "https://r4dscommunity.shinyapps.io/mentordash/"
-  return(redirect_uri)
-}
+# .construct_redirect_uri <- function(request) {
+#   # Using HTTP_HOST is better but still isn't solving the problem on shinyapps.
+#   host <- request$HTTP_HOST
+#   redirect_uri <- paste0(
+#     request$rook.url_scheme,
+#     "://",
+#     host
+#   )
+#   if (request$PATH_INFO != "/") {
+#     # We want things that come before any ?, not after.
+#     extra_info <- unlist(
+#       strsplit(
+#         x = request$PATH_INFO,
+#         split = "\\?"
+#       )
+#     )[[1]]
+#     redirect_uri <- paste0(redirect_uri, extra_info)
+#   }
+#   # Hack to get it to work on shinyapps for now.
+#   redirect_uri <- "https://r4dscommunity.shinyapps.io/mentordash/"
+#   return(redirect_uri)
+# }
 
 .team_loaded <- function(cookie_token) {
   shiny::reactive({
-    slackteams::add_team_token("R4ds", cookie_token)
-    slackteams::activate_team("R4ds")
-    slackteams::get_active_team() == "R4ds"
+    slackteams::add_team_token(team_name, cookie_token)
+    slackteams::activate_team(team_name)
+    slackteams::get_active_team() == team_name
   })
 }

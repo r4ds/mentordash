@@ -2,7 +2,7 @@
 % Please edit documentation in R/app_server.R
 \name{.get_questions}
 \alias{.get_questions}
-\title{Get R4DS Question Threads}
+\title{Get Question Threads}
 \usage{
 .get_questions(question_channels)
 }
@@ -10,6 +10,6 @@
 A tidy tibble of question information.
 }
 \description{
-Get R4DS Question Threads
+Get Question Threads
 }
 \keyword{internal}
