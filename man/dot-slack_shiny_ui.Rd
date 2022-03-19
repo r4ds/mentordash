@@ -2,9 +2,9 @@
 % Please edit documentation in R/oauth.R
 \name{.slack_shiny_ui}
 \alias{.slack_shiny_ui}
-\title{Require SLACK login to a Shiny app}
+\title{Require Slack login to a Shiny app}
 \usage{
-.slack_shiny_ui(ui, team)
+.slack_shiny_ui(ui, team, redirect_uri)
 }
 \arguments{
 \item{ui}{A function defining the UI of the Shiny app, or a

@@ -105,7 +105,7 @@
   return(question_channels)
 }
 
-#' Get R4DS Question Threads
+#' Get Question Threads
 #'
 #' @return A tidy tibble of question information.
 #' @keywords internal

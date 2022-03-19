@@ -12,6 +12,5 @@ rather than on shinyapps.io. Useful for debugging toward a deployed version
 of this app.}
 }
 \description{
-This function launches a Shiny App to help R4DS Online Learning Community
-mentors find unanswered questions.
+This function launches a Shiny App to help mentors find unanswered questions.
 }
