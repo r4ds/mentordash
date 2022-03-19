@@ -6,11 +6,12 @@
 #' @param ui A function defining the UI of the Shiny app, or a
 #'   \code{\link[shiny]{tagList}}.
 #' @param team A Slack team ID for which the user should be authenticated.
+#' @param site_url The URL of the Shiny app.
 #'
 #' @return A function defining the UI of a Shiny app (either with login or
 #'   without).
 #' @keywords internal
-.slack_shiny_ui <- function(ui, team, redirect_uri) {
+.slack_shiny_ui <- function(ui, team, site_url) {
   force(ui)
   function(request) {
     if (.has_token(request)) {
@@ -41,7 +42,7 @@
       # they don't accept.
       token <- slackteams::add_team_code(
         code = .extract_auth_code(request),
-        redirect_uri = redirect_uri
+        redirect_uri = site_url
       )
       return(
         shiny::tagList(
@@ -60,7 +61,7 @@
           ),
           shiny::tags$script(
             shiny::HTML(
-              sprintf("location.replace('%s');", redirect_uri)
+              sprintf("location.replace('%s');", site_url)
             )
           )
         )
@@ -85,7 +86,7 @@
       # maybe set_cookie and cookie_timeout
       auth_url <- slackteams::auth_url(
         scopes = slackteams::load_scopes(which = "slackverse"),
-        redirect_uri = .construct_redirect_uri(request),
+        redirect_uri = site_url,
         team_code = team
       )
       return(

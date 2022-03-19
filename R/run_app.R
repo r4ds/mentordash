@@ -9,15 +9,15 @@
 #' @export
 run_app <- function(local = FALSE, ...) {
   if (local) {
-    redirect_uri <- "http://127.0.0.1:4242/"
+    site_url <- "http://127.0.0.1:4242/"
   } else {
-    redirect_uri <- redirect_uri_production
+    site_url <- production_site_url
   }
   app <- shiny::shinyApp(
     ui = .slack_shiny_ui(
       .app_ui,
       team = "T6UC1DKJQ",
-      redirect_uri = redirect_uri
+      site_url = site_url
     ),
     server = .app_server
   )

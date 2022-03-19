@@ -4,13 +4,15 @@
 \alias{.slack_shiny_ui}
 \title{Require Slack login to a Shiny app}
 \usage{
-.slack_shiny_ui(ui, team, redirect_uri)
+.slack_shiny_ui(ui, team, site_url)
 }
 \arguments{
 \item{ui}{A function defining the UI of the Shiny app, or a
 \code{\link[shiny]{tagList}}.}
 
 \item{team}{A Slack team ID for which the user should be authenticated.}
+
+\item{site_url}{The URL of the Shiny app.}
 }
 \value{
 A function defining the UI of a Shiny app (either with login or
