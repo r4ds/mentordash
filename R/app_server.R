@@ -10,10 +10,18 @@
   # cookie first. Note: The cookie and code are static (they can't change during
   # a given session in a meaningful way).
 
-  is_logged_in <- .team_loaded(input$shinycookie[cookie_name])
+  is_logged_in <- shinyslack::check_login(
+    input = input,
+    team_id = team_id
+  )
 
   question_channels <- shiny::reactive({
     shiny::req(is_logged_in())
+    # Hmm. This is only needed because slackthreads sees that I have slackteams
+    # installed, and gets bossy about validating things. We should add the
+    # ability to ignore that.
+    slackteams::add_team_token(team_name, Sys.getenv("SLACK_API_TOKEN"))
+    slackteams::activate_team(team_name)
     .get_question_channels()
   })
 

@@ -14,9 +14,9 @@ run_app <- function(local = FALSE, ...) {
     site_url <- production_site_url
   }
   app <- shiny::shinyApp(
-    ui = .slack_shiny_ui(
-      .app_ui,
-      team = "T6UC1DKJQ",
+    ui = shinyslack::slack_shiny_ui(
+      ui = .app_ui,
+      team_id = team_id,
       site_url = site_url
     ),
     server = .app_server
