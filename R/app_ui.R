@@ -38,9 +38,6 @@
 .ui_body <- function() {
   shinydashboard::dashboardBody(
     shiny::fluidRow(
-      shinycookie::initShinyCookie("shinycookie")
-    ),
-    shiny::fluidRow(
       style = "padding-left:15px;padding-right:15px;",
       shinydashboard::valueBoxOutput("valuebox_answerable"),
       shinydashboard::valueBoxOutput("valuebox_followup")
