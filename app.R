@@ -8,5 +8,11 @@ pkgload::load_all(
   attach_testthat = FALSE,
   quiet = TRUE
 )
+
+shinyslack_key <- readLines(".secret", 1)
+Sys.setenv(
+  shinyslack_key = shinyslack_key
+)
+
 options( "golem.app.prod" = TRUE)
 mentordash::run_app() # add parameters here (if any)
