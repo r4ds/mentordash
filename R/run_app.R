@@ -7,7 +7,7 @@
 #'   of this app.
 #'
 #' @export
-run_app <- function(local = FALSE, ...) {
+run_app <- function(local = interactive(), ...) {
   if (local) {
     site_url <- "http://127.0.0.1:4242/"
   } else {
