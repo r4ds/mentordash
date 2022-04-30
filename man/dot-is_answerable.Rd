@@ -4,7 +4,7 @@
 \alias{.is_answerable}
 \title{Check Whether a Question is Answerable}
 \usage{
-.is_answerable(speech_balloons, users, reply_userses, channels, tses)
+.is_answerable(speech_balloons, users, reply_userses, channel_ids, tses)
 }
 \arguments{
 \item{speech_balloons}{The logical vector indicating whether a question is
@@ -15,11 +15,11 @@ tagged with the "needs more information" emoji.}
 \item{reply_userses}{The list of character vectors of users who have replied
 to this thread.}
 
-\item{channels}{The character vector of channels in which the questions were
-posted.}
-
 \item{tses}{The character vector of timestamps for threads attached to the
 question.}
+
+\item{channels}{The character vector of channels in which the questions were
+posted.}
 }
 \value{
 A logical vector.

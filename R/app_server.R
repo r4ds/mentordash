@@ -5,25 +5,9 @@
 #' @return Shiny reactive updates.
 #' @keywords internal
 .app_server <- function(input, output, session) {
-  # If they get to the actual shiny app, there's either a code in the URL or a
-  # cookie with the Slack token. Even if there's a code in the URL, check the
-  # cookie first. Note: The cookie and code are static (they can't change during
-  # a given session in a meaningful way).
-
-  is_logged_in <- shinyslack::check_login(
-    input = input,
-    team_id = team_id
-  )
-
-  question_channels <- shiny::reactive({
-    shiny::req(is_logged_in())
-    # Hmm. This is only needed because slackthreads sees that I have slackteams
-    # installed, and gets bossy about validating things. We should add the
-    # ability to ignore that.
-    slackteams::add_team_token(team_name, Sys.getenv("SLACK_API_TOKEN"))
-    slackteams::activate_team(team_name)
-    .get_question_channels()
-  })
+  # If they're here, they're authenticated with Slack, and the proper
+  # environment variable is set for shinyslack to use.
+  question_channels <- shiny::reactive(.get_question_channels())
 
   questions_df <- shiny::eventReactive(
     input$refresh,
@@ -106,10 +90,14 @@
 
 .get_question_channels <- function() {
   channels <- slackteams:::get_conversations_list(type = "public_channel")
-  question_channels <- sort(
-    grep("^help", channels$name[channels$is_channel], value = TRUE)
+  question_channels_df <- dplyr::filter(
+    channels, stringr::str_starts(.data$name, "help-")
   )
-  names(question_channels) <- question_channels
+
+  question_channels <- rlang::set_names(
+    question_channels_df$id,
+    question_channels_df$name
+  )
   return(question_channels)
 }
 
@@ -120,6 +108,7 @@
 .get_questions <- function(question_channels) {
   ## Read in Conversations ----
   total_results <- 100L
+
   convos <- purrr::map(
     question_channels,
     slackthreads::conversations,
@@ -136,6 +125,9 @@
 #' Rectangle Conversation Data
 #'
 #' @param convos A list returned by slackthreads::conversations.
+#' @param question_channels A named character vector, where the name is the
+#'   user-friendly name of the channel, and the internal character is the
+#'   channel ID.
 #'
 #' @return A tibble of question data.
 #' @keywords internal
@@ -223,7 +215,7 @@
       ),
       answerable = .is_answerable(
         .data$speech_balloon, .data$user, .data$reply_users,
-        channels = .data$channel, tses = .data$thread_ts
+        channel_ids = .data$channel_id, tses = .data$thread_ts
       )
     ) %>%
     # Seeing if dumping "waiting for op followup" here speeds things up.
@@ -320,7 +312,7 @@
 .is_answerable <- function(speech_balloons,
                            users,
                            reply_userses,
-                           channels,
+                           channel_ids,
                            tses) {
   # We need to return a logical vector indicating whether this question is
   # "answerable", meaning the thread hasn't been tagged as needing more info OR
@@ -343,15 +335,15 @@
   answerable[!answerable] <- purrr::pmap_lgl(
     .l = list(
       ts = tses[!answerable],
-      channel = channels[!answerable],
+      channel_id = channel_ids[!answerable],
       user = users[!answerable],
       reply_users = reply_userses[!answerable]
     ),
-    .f = function(ts, channel, user, reply_users) {
+    .f = function(ts, channel_id, user, reply_users) {
       if (user %in% reply_users) {
-        last_reply_user <- slackthreads::replies(ts, channel) %>%
+        last_reply_user <- slackthreads::replies(ts, channel_id) %>%
           tibble::enframe() %>%
-          tidyr::hoist(value, "ts", "user") %>%
+          tidyr::hoist(.data$value, "ts", "user") %>%
           dplyr::arrange(dplyr::desc(ts)) %>%
           dplyr::slice(1) %>%
           dplyr::pull(user)
