@@ -5,17 +5,23 @@
 #' @return Shiny reactive updates.
 #' @keywords internal
 .app_server <- function(input, output, session) {
-  # If they're here, they're authenticated with Slack, and the proper
-  # environment variable is set for shinyslack to use.
-  question_channels <- shiny::reactive(.get_question_channels())
+  is_logged_in <- shinyslack::check_login(
+    input = input,
+    team_id = team_id
+  )
+
+  question_channels <- shiny::reactive({
+    shiny::req(is_logged_in())
+    .get_question_channels()
+  })
 
   questions_df <- shiny::eventReactive(
-    input$refresh,
+    input$refresh | is_logged_in(),
     {
       shiny::req(question_channels())
       .get_questions(question_channels())
     },
-    ignoreNULL = FALSE
+    ignoreNULL = TRUE
   )
 
   # Once the questions_df loads, update the "Refresh" button to say "Refresh".
