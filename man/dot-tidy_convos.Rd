@@ -8,6 +8,10 @@
 }
 \arguments{
 \item{convos}{A list returned by slackthreads::conversations.}
+
+\item{question_channels}{A named character vector, where the name is the
+user-friendly name of the channel, and the internal character is the
+channel ID.}
 }
 \value{
 A tibble of question data.

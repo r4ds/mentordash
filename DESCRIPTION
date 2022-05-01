@@ -1,6 +1,6 @@
 Package: mentordash
 Title: Dashboard for the R4DS Online Learning Community
-Version: 0.3.2
+Version: 0.3.3
 Authors@R: c(
     person(
       'Jon', 'Harmon', email = 'jonthegeek@gmail.com', role = c('cre', 'aut')
@@ -24,9 +24,8 @@ Imports:
     purrr,
     rlang,
     shiny (>= 1.5.0),
-    shinycookie,
     shinydashboard,
-    shinyslack,
+    shinyslack (>= 0.0.0.9001),
     slackteams (>= 0.4.1),
     slackthreads (>= 0.1.0),
     stats,
@@ -39,7 +38,6 @@ BugReports: https://github.com/r4ds/mentordash/issues
 Suggests: 
     testthat
 Remotes: 
-    colearendt/shinycookie,
     r4ds/shinyslack,
     yonicd/slackteams,
     yonicd/slackthreads
