@@ -9,15 +9,17 @@ on:
 
 jobs:
   deploy-shiny:
-    runs-on: ubuntu-latest
+    runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@master
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rsconnect
-          cache-version: 1
+      - name: Install dependencies
+        run: |
+          install.packages(c("remotes", "rsconnect"), type = "binary")
+          remotes::install_deps(dependencies = TRUE)
+        shell: Rscript {0}
       - name: push to shinyapps
         run: |
-          Rscript -e "rsconnect::setAccountInfo(name='r4dscommunity', token=${{secrets.SHINYAPPS_TOKEN}}, secret=${{secrets.SHINYAPPS_SECRET}})"
-          Rscript -e "rsconnect::deployApp(appName = 'mentordash')"
+          rsconnect::setAccountInfo(name='r4dscommunity', token=${{secrets.SHINYAPPS_TOKEN}}, secret=${{secrets.SHINYAPPS_SECRET}})
+          rsconnect::deployApp(appName = 'mentordash')
+        shell: Rscript {0}
