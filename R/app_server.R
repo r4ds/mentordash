@@ -95,7 +95,7 @@
 }
 
 .get_question_channels <- function() {
-  channels <- slackteams:::get_conversations_list(type = "public_channel")
+  channels <- slackteams::get_conversations_list(type = "public_channel")
   question_channels_df <- dplyr::filter(
     channels, stringr::str_starts(.data$name, "help-")
   )
