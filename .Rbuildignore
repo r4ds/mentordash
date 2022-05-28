@@ -11,3 +11,4 @@ $run_dev.*
 ^rsconnect$
 ^\.secret$
 ^\.Renviron$
+^\.github$

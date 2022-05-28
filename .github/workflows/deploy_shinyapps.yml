@@ -1,0 +1,23 @@
+name: deploy-shinyapps
+on:
+  push:
+    branches: main
+    paths-ignore:
+      - 'README.md'
+  workflow_dispatch:
+
+
+jobs:
+  deploy-shiny:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: r-lib/actions/setup-r@master
+      - name: Install packages
+        run: |
+          install.packages(c("rsconnect", "pkgload"), type = "binary")
+        shell: Rscript {0}
+      - name: push to shinyapps
+        run: |
+          Rscript -e "rsconnect::setAccountInfo(name='r4dscommunity', token=${{secrets.SHINYAPPS_TOKEN}}, secret=${{secrets.SHINYAPPS_SECRET}})"
+          Rscript -e "rsconnect::deployApp(appName = 'mentordash')"
