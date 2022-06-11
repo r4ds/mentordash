@@ -9,6 +9,7 @@ on:
 
 jobs:
   deploy-shiny:
+    if: github.repository_owner == 'r4ds'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
