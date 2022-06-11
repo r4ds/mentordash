@@ -7,7 +7,7 @@
 .app_server <- function(input, output, session) {
   is_logged_in <- shinyslack::check_login(
     input = input,
-    team_id = team_id
+    team_id = .team_id
   )
 
   question_channels <- shiny::reactive({

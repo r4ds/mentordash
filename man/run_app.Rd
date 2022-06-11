@@ -7,9 +7,8 @@
 run_app(local = interactive(), ...)
 }
 \arguments{
-\item{local}{A logical indicating whether you are launching the app locally,
-rather than on shinyapps.io. Useful for debugging toward a deployed version
-of this app.}
+\item{...}{arguments to pass to golem_opts. See
+\code{\link[golem]{get_golem_options}} for more details.}
 }
 \description{
 This function launches a Shiny App to help mentors find unanswered questions.
