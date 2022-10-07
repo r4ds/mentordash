@@ -1,6 +1,6 @@
 Package: mentordash
 Title: Dashboard for the R4DS Online Learning Community
-Version: 0.3.5
+Version: 0.3.6
 Authors@R: c(
     person(
       'Jon', 'Harmon', email = 'jonthegeek@gmail.com', role = c('cre', 'aut')
@@ -14,30 +14,31 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports: 
+    config,
     dplyr,
     DT,
     golem (>= 0.2.1),
-    httpuv,
     lubridate,
     magrittr,
     pkgload,
     purrr,
     rlang,
+    scenes (>= 0.0.0.9002),
     shiny (>= 1.5.0),
     shinydashboard,
-    shinyslack (>= 0.0.0.9002),
+    shinyslack (>= 0.0.0.9003),
     slackteams (>= 0.4.3),
     slackthreads (>= 0.1.0),
-    stats,
     stringr,
     tibble,
     tidyr (>= 1.0.0)
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 URL: https://github.com/r4ds/mentordash
 BugReports: https://github.com/r4ds/mentordash/issues
 Suggests: 
     testthat
 Remotes: 
+    r4ds/scenes,
     r4ds/shinyslack,
     yonicd/slackteams,
     yonicd/slackthreads

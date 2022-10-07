@@ -1,4 +1,4 @@
-.team_id = "T6UC1DKJQ"
+.team_id <- "T6UC1DKJQ"
 .site_url <- "https://r4dscommunity.shinyapps.io/mentordash/"
 
 usethis::use_data(
