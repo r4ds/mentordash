@@ -5,10 +5,7 @@
 #' @return Shiny reactive updates.
 #' @keywords internal
 .app_server <- function(input, output, session) {
-  is_logged_in <- shinyslack::check_login(
-    input = input,
-    team_id = .team_id
-  )
+  is_logged_in <- shinyslack::check_login(team_id = .team_id)
 
   question_channels <- shiny::reactive({
     shiny::req(is_logged_in())
