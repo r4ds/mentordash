@@ -19,3 +19,14 @@ jobs:
         with:
           extra-packages: any::rsconnect
           cache-version: 1
+
+      - name: Set up .Renviron
+        run: |
+          shinyslack_key=${{secrets.SHINYSLACK_KEY}} > .Renviron
+        shell: bash {0}
+
+      - name: Push to shinyapps
+        run: |
+          rsconnect::setAccountInfo(name='r4dscommunity', token=${{secrets.SHINYAPPS_TOKEN}}, secret=${{secrets.SHINYAPPS_SECRET}})
+          rsconnect::deployApp(appName = 'mentordashtest')
+        shell: Rscript {0}
