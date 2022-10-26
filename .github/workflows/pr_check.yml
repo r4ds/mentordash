@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  bookdown:
+  deploy-shiny:
     name: pr_check_shinyapps
     runs-on: ubuntu-latest
     steps:
@@ -19,8 +19,11 @@ jobs:
         with:
           extra-packages: any::rsconnect
           cache-version: 1
-      - name: push to shinyapps
-        run: |
-          rsconnect::setAccountInfo(name='r4dscommunity', token=${{secrets.SHINYAPPS_TOKEN}}, secret=${{secrets.SHINYAPPS_SECRET}})
-          rsconnect::deployApp(appName = 'mentordashtest')
-        shell: Rscript {0}
+      - name: Push to shinyapps
+        - shell: bash
+          run: |
+            shinyslack_key=${{secrets.SHINYSLACK_KEY}} > .Renviron
+        - shell: Rscript {0}
+          run: |
+            rsconnect::setAccountInfo(name='r4dscommunity', token=${{secrets.SHINYAPPS_TOKEN}}, secret=${{secrets.SHINYAPPS_SECRET}})
+            rsconnect::deployApp(appName = 'mentordashtest')
