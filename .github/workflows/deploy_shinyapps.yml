@@ -24,7 +24,8 @@ jobs:
 
       - name: Set up .Renviron
         run: |
-          shinyslack_key=${{secrets.SHINYSLACK_KEY}} > .Renviron
+          echo "shinyslack_key=${{secrets.SHINYSLACK_KEY}}" >> .Renviron
+          echo "SLACK_SKIPLOAD=TRUE" >> .Renviron
         shell: bash {0}
 
       - name: Push to shinyapps
