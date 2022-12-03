@@ -10,4 +10,4 @@ pkgload::load_all(
 )
 
 options( "golem.app.prod" = TRUE)
-mentordash::run_app() # add parameters here (if any)
+run_app() # add parameters here (if any)
