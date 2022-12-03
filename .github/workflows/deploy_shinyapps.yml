@@ -25,6 +25,8 @@ jobs:
 
       - name: Push to shinyapps
         run: |
+          install.packages("pak")
+          pak::pkg_install("rsconnect")
           rsconnect::setAccountInfo(name='r4dscommunity', token=${{secrets.SHINYAPPS_TOKEN}}, secret=${{secrets.SHINYAPPS_SECRET}})
           rsconnect::deployApp(appName = 'mentordash')
         shell: Rscript {0}
