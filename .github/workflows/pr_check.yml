@@ -15,10 +15,6 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: '4.2.2'
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rsconnect
-          cache-version: 1
 
       - name: Set up .Renviron
         run: |
@@ -28,6 +24,7 @@ jobs:
 
       - name: Push to shinyapps
         run: |
+          install.packages("rsconnect")
           rsconnect::setAccountInfo(name='r4dscommunity', token=${{secrets.SHINYAPPS_TOKEN}}, secret=${{secrets.SHINYAPPS_SECRET}})
           rsconnect::deployApp(appName = 'mentordashtest')
         shell: Rscript {0}
