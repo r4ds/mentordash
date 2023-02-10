@@ -128,9 +128,6 @@
 #' Rectangle Conversation Data
 #'
 #' @param convos A list returned by slackthreads::conversations.
-#' @param question_channels A named character vector, where the name is the
-#'   user-friendly name of the channel, and the internal character is the
-#'   channel ID.
 #'
 #' @return A tibble of question data.
 #' @keywords internal
