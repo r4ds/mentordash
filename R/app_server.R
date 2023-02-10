@@ -104,6 +104,21 @@
   return(question_channels)
 }
 
+.get_mentors <- function() {
+  mentors <- slackcalls::post_slack(
+    "conversations.members",
+    channel = "GAJ8D7YKA"
+  )
+
+  if (mentors$ok && "members" %in% names(mentors)) {
+    return(unlist(mentors$members))
+  } else {
+    # Figure out logging here so we can see who is using mentordash but isn't in
+    # mentors_chat.
+    return(character())
+  }
+}
+
 #' Get Question Threads
 #'
 #' @return A tidy tibble of question information.
@@ -128,9 +143,6 @@
 #' Rectangle Conversation Data
 #'
 #' @param convos A list returned by slackthreads::conversations.
-#' @param question_channels A named character vector, where the name is the
-#'   user-friendly name of the channel, and the internal character is the
-#'   channel ID.
 #'
 #' @return A tibble of question data.
 #' @keywords internal
@@ -172,6 +184,8 @@
       reply_count = tidyr::replace_na(.data$reply_count, 0)
     )
 
+  mentors <- .get_mentors()
+
   convos_tbl <- convos_tbl %>%
     # Get rid of channel_join and channel_name.
     dplyr::filter(
@@ -190,20 +204,26 @@
       )
     ) %>%
     dplyr::filter(
-      latest_activity >= (lubridate::now() - keep_timeframe)
+      .data$latest_activity >= (lubridate::now() - keep_timeframe)
     ) %>%
     dplyr::mutate(
       heavy_check_mark = .has_reaction(
         .data$reactions,
-        c("heavy_check_mark", "question-answered", "white_check_mark")
+        c("heavy_check_mark", "question-answered", "white_check_mark"),
+        .data$user,
+        mentors
       ),
       thread_tag = .has_reaction(
         .data$reactions,
-        "thread"
+        "thread",
+        .data$user,
+        mentors
       ),
       nevermind = .has_reaction(
         .data$reactions,
-        c("question-nevermind", "octagonal_sign", "nevermind")
+        c("question-nevermind", "octagonal_sign", "nevermind"),
+        .data$user,
+        mentors
       )
     ) %>%
     dplyr::filter(
@@ -214,7 +234,9 @@
     dplyr::mutate(
       speech_balloon = .has_reaction(
         .data$reactions,
-        c("speech_balloon", "question-more-info")
+        c("speech_balloon", "question-more-info"),
+        .data$user,
+        mentors
       ),
       answerable = .is_answerable(
         .data$speech_balloon, .data$user, .data$reply_users,
@@ -278,24 +300,38 @@
 #' @param reactions A list of reaction lists.
 #' @param reaction_name A character vector with the name of one or more target
 #'   reactions.
+#' @param users The character vector of user ids of the person who posted each
+#'   message.
+#' @param mentors A character vector of mentors to use for filtering.
 #'
 #' @return A logical vector the same length as reactions.
 #' @keywords internal
-.has_reaction <- function(reactions, reaction_name) {
-  purrr::map_lgl(reactions, function(rxns) {
-    if (all(is.na(rxns))) {
-      FALSE
-    } else {
-      any(
-        purrr::map_lgl(
-          rxns,
-          function(rxn) {
-            rxn$name %in% reaction_name
-          }
+.has_reaction <- function(reactions,
+                          reaction_name,
+                          users,
+                          mentors = character()) {
+  purrr::map2_lgl(
+    reactions, users,
+    function(rxns, user) {
+      if (all(is.na(rxns))) {
+        FALSE
+      } else {
+        any(
+          purrr::map_lgl(
+            rxns,
+            function(rxn) {
+              rxn$name %in% reaction_name &&
+                (
+                  !length(mentors) ||
+                    user %in% rxn$users ||
+                    any(rxn$users %in% mentors)
+                )
+            }
+          )
         )
-      )
+      }
     }
-  })
+  )
 }
 
 #' Check Whether a Question is Answerable
