@@ -9,5 +9,5 @@ pkgload::load_all(
   quiet = TRUE
 )
 
-options( "golem.app.prod" = TRUE)
+options("golem.app.prod" = TRUE)
 run_app() # add parameters here (if any)

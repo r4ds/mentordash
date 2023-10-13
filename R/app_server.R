@@ -243,41 +243,23 @@
         channel_ids = .data$channel_id, tses = .data$thread_ts
       )
     ) %>%
-    # Seeing if dumping "waiting for op followup" here speeds things up.
-    # dplyr::filter(answerable) %>%
     dplyr::mutate(
-      `web link` = purrr::map2(
+      link = purrr::map2(
         .data$channel_id, .data$ts,
         function(chnl, this_ts) {
           paste0(
             "<a href=\"",
             paste(
-              "https://app.slack.com/client/T6UC1DKJQ",
+              "https://rfordatascience.slack.com/archives",
               chnl,
-              this_ts,
+              paste0("p", sub(x = this_ts, "\\.", "")),
               sep = "/"
             ),
-            "\", target=\"_blank\">Web</a>"
+            "\", target=\"_blank\">load question</a>"
           )
         }
       ),
-      # `app link` = purrr::map2(
-      #   .data$channel_id, .data$ts,
-      #   function(chnl, this_ts) {
-      #     paste0(
-      #       "<a href=\"",
-      #       paste(
-      #         "https://rfordatascience.slack.com/archives",
-      #         chnl,
-      #         paste0("p", sub(x = this_ts, "\\.", "")),
-      #         sep = "/"
-      #       ),
-      #       "\", target=\"_blank\">App</a>"
-      #     )
-      #   }
-      # ),
       excerpt = stringr::str_trunc(text, 100),
-      # links = paste(`web link`, `app link`, sep = " | "),
       latest_activity = format(latest_activity, "%Y-%m-%d %H:%M:%S")
     ) %>%
     dplyr::select(
@@ -286,8 +268,7 @@
       .data$reply_count,
       .data$speech_balloon,
       .data$answerable,
-      .data$`web link`,
-      # .data$links,
+      .data$link,
       .data$latest_activity
     ) %>%
     dplyr::arrange(.data$latest_activity)

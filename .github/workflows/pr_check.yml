@@ -29,5 +29,5 @@ jobs:
       - name: Push to shinyapps
         run: |
           rsconnect::setAccountInfo(name='r4dscommunity', token=${{secrets.SHINYAPPS_TOKEN}}, secret=${{secrets.SHINYAPPS_SECRET}})
-          rsconnect::deployApp(appName = 'mentordashtest')
+          rsconnect::deployApp(appName = 'mentordashtest', forceUpdate = TRUE)
         shell: Rscript {0}
