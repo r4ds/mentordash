@@ -67,9 +67,9 @@
 
   output$answerable_questions <- DT::renderDataTable({
     shiny::req(questions_df())
-    questions_df() %>%
-      dplyr::filter(.data$answerable) %>%
-      dplyr::select(-"answerable", -"speech_balloon") %>%
+    questions_df() |>
+      dplyr::filter(.data$answerable) |>
+      dplyr::select(-"answerable", -"speech_balloon") |>
       DT::datatable(
         rownames = FALSE,
         # filter = 'top',
@@ -79,9 +79,9 @@
   })
 
   output$followup_questions <- DT::renderDataTable({
-    questions_df() %>%
-      dplyr::filter(!.data$answerable) %>%
-      dplyr::select(-"answerable", -"speech_balloon") %>%
+    questions_df() |>
+      dplyr::filter(!.data$answerable) |>
+      dplyr::select(-"answerable", -"speech_balloon") |>
       DT::datatable(
         rownames = FALSE,
         # filter = 'top',
@@ -165,7 +165,7 @@
       )
     },
     .id = "channel"
-  ) %>%
+  ) |>
     # A general unnest_wider was breaking, so let's just get the channels we
     # care about.
     tidyr::hoist(
@@ -179,19 +179,19 @@
       "reply_users",
       "thread_ts",
       "text"
-    ) %>%
+    ) |>
     dplyr::mutate(
       reply_count = tidyr::replace_na(.data$reply_count, 0)
     )
 
   mentors <- .get_mentors()
 
-  convos_tbl <- convos_tbl %>%
+  convos_tbl <- convos_tbl |>
     # Get rid of channel_join and channel_name.
     dplyr::filter(
       !(.data$subtype %in% bad_subtypes),
       .data$user != "USLACKBOT"
-    ) %>%
+    ) |>
     # Only keep "recent" threads.
     dplyr::mutate(
       latest_activity = as.POSIXct(
@@ -202,10 +202,10 @@
         ),
         origin = "1970-01-01"
       )
-    ) %>%
+    ) |>
     dplyr::filter(
       .data$latest_activity >= (lubridate::now() - keep_timeframe)
-    ) %>%
+    ) |>
     dplyr::mutate(
       heavy_check_mark = .has_reaction(
         .data$reactions,
@@ -225,12 +225,12 @@
         .data$user,
         mentors
       )
-    ) %>%
+    ) |>
     dplyr::filter(
       !.data$heavy_check_mark,
       !.data$thread_tag,
       !.data$nevermind
-    ) %>%
+    ) |>
     dplyr::mutate(
       speech_balloon = .has_reaction(
         .data$reactions,
@@ -242,54 +242,35 @@
         .data$speech_balloon, .data$user, .data$reply_users,
         channel_ids = .data$channel_id, tses = .data$thread_ts
       )
-    ) %>%
-    # Seeing if dumping "waiting for op followup" here speeds things up.
-    # dplyr::filter(answerable) %>%
+    ) |>
     dplyr::mutate(
-      `web link` = purrr::map2(
+      link = purrr::map2(
         .data$channel_id, .data$ts,
         function(chnl, this_ts) {
           paste0(
             "<a href=\"",
             paste(
-              "https://app.slack.com/client/T6UC1DKJQ",
+              "https://rfordatascience.slack.com/archives",
               chnl,
-              this_ts,
+              paste0("p", sub(x = this_ts, "\\.", "")),
               sep = "/"
             ),
-            "\", target=\"_blank\">Web</a>"
+            "\", target=\"_blank\">load question</a>"
           )
         }
       ),
-      # `app link` = purrr::map2(
-      #   .data$channel_id, .data$ts,
-      #   function(chnl, this_ts) {
-      #     paste0(
-      #       "<a href=\"",
-      #       paste(
-      #         "https://rfordatascience.slack.com/archives",
-      #         chnl,
-      #         paste0("p", sub(x = this_ts, "\\.", "")),
-      #         sep = "/"
-      #       ),
-      #       "\", target=\"_blank\">App</a>"
-      #     )
-      #   }
-      # ),
       excerpt = stringr::str_trunc(text, 100),
-      # links = paste(`web link`, `app link`, sep = " | "),
       latest_activity = format(latest_activity, "%Y-%m-%d %H:%M:%S")
-    ) %>%
+    ) |>
     dplyr::select(
       .data$channel,
       .data$excerpt,
       .data$reply_count,
       .data$speech_balloon,
       .data$answerable,
-      .data$`web link`,
-      # .data$links,
+      .data$link,
       .data$latest_activity
-    ) %>%
+    ) |>
     dplyr::arrange(.data$latest_activity)
 
   return(convos_tbl)
@@ -380,11 +361,11 @@
     ),
     .f = function(ts, channel_id, user, reply_users) {
       if (user %in% reply_users) {
-        last_reply_user <- slackthreads::replies(ts, channel_id) %>%
-          tibble::enframe() %>%
-          tidyr::hoist(.data$value, "ts", "user") %>%
-          dplyr::arrange(dplyr::desc(ts)) %>%
-          dplyr::slice(1) %>%
+        last_reply_user <- slackthreads::replies(ts, channel_id) |>
+          tibble::enframe() |>
+          tidyr::hoist(.data$value, "ts", "user") |>
+          dplyr::arrange(dplyr::desc(ts)) |>
+          dplyr::slice(1) |>
           dplyr::pull(user)
         return(last_reply_user == user)
       } else {
