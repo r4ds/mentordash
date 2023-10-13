@@ -4,13 +4,18 @@
 \alias{.has_reaction}
 \title{Check for a Reaction in Reactions}
 \usage{
-.has_reaction(reactions, reaction_name)
+.has_reaction(reactions, reaction_name, users, mentors = character())
 }
 \arguments{
 \item{reactions}{A list of reaction lists.}
 
 \item{reaction_name}{A character vector with the name of one or more target
 reactions.}
+
+\item{users}{The character vector of user ids of the person who posted each
+message.}
+
+\item{mentors}{A character vector of mentors to use for filtering.}
 }
 \value{
 A logical vector the same length as reactions.

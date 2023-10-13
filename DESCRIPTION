@@ -2,24 +2,22 @@ Package: mentordash
 Title: Dashboard for the R4DS Online Learning Community
 Version: 0.4.0
 Authors@R: c(
-    person(
-      'Jon', 'Harmon', email = 'jonthegeek@gmail.com', role = c('cre', 'aut')
-    ),
-    person(
-      'Tan', 'Ho', email = 'tan@tanho.ca', role = c('ctb')
-    )
-    )
-Description: This is a golem shiny app for the R4DS Online Learning Community.
+    person("Jon", "Harmon", , "jonthegeek@gmail.com", role = c("cre", "aut")),
+    person("Tan", "Ho", , "tan@tanho.ca", role = "ctb")
+  )
+Description: This is a golem shiny app for the R4DS Online Learning
+    Community.
 License: MIT + file LICENSE
-Encoding: UTF-8
-LazyData: true
+URL: https://github.com/r4ds/mentordash
+BugReports: https://github.com/r4ds/mentordash/issues
+Depends: 
+    R (>= 4.1)
 Imports: 
     config,
     dplyr,
     DT,
     golem (>= 0.2.1),
     lubridate,
-    magrittr,
     pkgload,
     purrr,
     rlang,
@@ -32,14 +30,12 @@ Imports:
     stringr,
     tibble,
     tidyr (>= 1.0.0)
-RoxygenNote: 7.2.1
-URL: https://github.com/r4ds/mentordash
-BugReports: https://github.com/r4ds/mentordash/issues
 Suggests: 
     testthat
 Remotes: 
     r4ds/shinyslack,
     yonicd/slackteams,
     yonicd/slackthreads
-Depends: 
-    R (>= 2.10)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
