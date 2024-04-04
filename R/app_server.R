@@ -250,7 +250,7 @@
           paste0(
             "<a href=\"",
             paste(
-              "https://rfordatascience.slack.com/archives",
+              "https://dslcio.slack.com/archives",
               chnl,
               paste0("p", sub(x = this_ts, "\\.", "")),
               sep = "/"

@@ -3,7 +3,7 @@
 #' @return A \code{\link[shiny]{tagList}} containing the UI.
 #' @keywords internal
 .app_ui <- function() {
-  dashboard_title <- "R4DS Mentor Tool 2022-10-26"
+  dashboard_title <- "DSLC Mentor Tool 2024-04-04"
   shinydashboard::dashboardPage(
     header = .ui_header(dashboard_title),
     sidebar = .ui_sidebar(),

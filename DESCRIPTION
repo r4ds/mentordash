@@ -1,12 +1,11 @@
 Package: mentordash
-Title: Dashboard for the R4DS Online Learning Community
+Title: Dashboard for the Data Science Learning Community
 Version: 0.4.0
 Authors@R: c(
     person("Jon", "Harmon", , "jonthegeek@gmail.com", role = c("cre", "aut")),
     person("Tan", "Ho", , "tan@tanho.ca", role = "ctb")
   )
-Description: This is a golem shiny app for the R4DS Online Learning
-    Community.
+Description: This is a golem shiny app for the Data Science Learning Community.
 License: MIT + file LICENSE
 URL: https://github.com/r4ds/mentordash
 BugReports: https://github.com/r4ds/mentordash/issues
