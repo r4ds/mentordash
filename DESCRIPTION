@@ -5,7 +5,8 @@ Authors@R: c(
     person("Jon", "Harmon", , "jonthegeek@gmail.com", role = c("cre", "aut")),
     person("Tan", "Ho", , "tan@tanho.ca", role = "ctb")
   )
-Description: This is a golem shiny app for the Data Science Learning Community.
+Description: This is a golem shiny app for the Data Science Learning
+    Community.
 License: MIT + file LICENSE
 URL: https://github.com/r4ds/mentordash
 BugReports: https://github.com/r4ds/mentordash/issues
@@ -23,7 +24,8 @@ Imports:
     scenes (>= 0.0.0.9003),
     shiny (>= 1.5.0),
     shinydashboard,
-    shinyslack (>= 0.0.0.9006),
+    shinyslack (>= 0.0.0.9010),
+    slackcalls,
     slackteams (>= 0.4.3),
     slackthreads (>= 0.1.0),
     stringr,
@@ -33,6 +35,7 @@ Suggests:
     testthat
 Remotes: 
     r4ds/shinyslack,
+    yonicd/slackcalls,
     yonicd/slackteams,
     yonicd/slackthreads
 Encoding: UTF-8
