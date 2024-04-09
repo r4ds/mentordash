@@ -91,8 +91,12 @@
   })
 }
 
-.get_question_channels <- function() {
-  channels <- slackteams::get_conversations_list(type = "public_channel")
+.get_question_channels <- function(session = shiny::getDefaultReactiveDomain(),
+                                   slack_api_key = session$userData$shinyslack_api_key) {
+  channels <- slackteams::get_conversations_list(
+    type = "public_channel",
+    token = slack_api_key
+  )
   question_channels_df <- dplyr::filter(
     channels, stringr::str_starts(.data$name, "help-")
   )
@@ -104,10 +108,12 @@
   return(question_channels)
 }
 
-.get_mentors <- function() {
+.get_mentors <- function(session = shiny::getDefaultReactiveDomain(),
+                         slack_api_key = session$userData$shinyslack_api_key) {
   mentors <- slackcalls::post_slack(
     "conversations.members",
-    channel = "GAJ8D7YKA"
+    channel = "GAJ8D7YKA",
+    token = slack_api_key
   )
 
   if (mentors$ok && "members" %in% names(mentors)) {
@@ -123,7 +129,9 @@
 #'
 #' @return A tidy tibble of question information.
 #' @keywords internal
-.get_questions <- function(question_channels) {
+.get_questions <- function(question_channels,
+                           session = shiny::getDefaultReactiveDomain(),
+                           slack_api_key = session$userData$shinyslack_api_key) {
   ## Read in Conversations ----
   total_results <- 100L
 
@@ -131,7 +139,8 @@
     question_channels,
     slackthreads::conversations,
     max_results = total_results,
-    limit = min(total_results, 1000L)
+    limit = min(total_results, 1000L),
+    token = slack_api_key
   )
 
   ## Response to Tibble ----
@@ -333,7 +342,9 @@
                            users,
                            reply_userses,
                            channel_ids,
-                           tses) {
+                           tses,
+                           session = shiny::getDefaultReactiveDomain(),
+                           slack_api_key = session$userData$shinyslack_api_key) {
   # We need to return a logical vector indicating whether this question is
   # "answerable", meaning the thread hasn't been tagged as needing more info OR
   # there isn't a reply OR the latest reply was by the user. To determine the
@@ -361,7 +372,11 @@
     ),
     .f = function(ts, channel_id, user, reply_users) {
       if (user %in% reply_users) {
-        last_reply_user <- slackthreads::replies(ts, channel_id) |>
+        last_reply_user <- slackthreads::replies(
+          ts,
+          channel_id,
+          token = slack_api_key
+        ) |>
           tibble::enframe() |>
           tidyr::hoist(.data$value, "ts", "user") |>
           dplyr::arrange(dplyr::desc(ts)) |>

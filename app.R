@@ -9,5 +9,13 @@ pkgload::load_all(
   quiet = TRUE
 )
 
-options("golem.app.prod" = TRUE)
+# options("golem.app.prod" = TRUE)
+options("golem.app.prod" = FALSE)
 run_app() # add parameters here (if any)
+
+# Debug just the UI without login:
+
+# shiny::shinyApp(
+#   ui = .app_ui,
+#   server = .app_server
+# )
