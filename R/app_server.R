@@ -224,8 +224,7 @@
       ),
       thread_tag = .has_reaction(
         .data$reactions,
-        "thread",
-        .data$user,
+        c("thread", "reply"),
         mentors
       ),
       nevermind = .has_reaction(
