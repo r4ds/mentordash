@@ -219,19 +219,19 @@
       heavy_check_mark = .has_reaction(
         .data$reactions,
         c("heavy_check_mark", "question-answered", "white_check_mark"),
-        .data$user,
-        mentors
+        users = .data$user,
+        mentors = mentors
       ),
       thread_tag = .has_reaction(
         .data$reactions,
         c("thread", "reply"),
-        mentors
+        mentors = mentors
       ),
       nevermind = .has_reaction(
         .data$reactions,
         c("question-nevermind", "octagonal_sign", "nevermind"),
-        .data$user,
-        mentors
+        users = .data$user,
+        mentors = mentors
       )
     ) |>
     dplyr::filter(
@@ -297,7 +297,7 @@
 #' @keywords internal
 .has_reaction <- function(reactions,
                           reaction_name,
-                          users,
+                          users = character(length(reactions)),
                           mentors = character()) {
   purrr::map2_lgl(
     reactions, users,
