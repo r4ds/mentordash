@@ -4,10 +4,12 @@
 \alias{.tidy_convos}
 \title{Rectangle Conversation Data}
 \usage{
-.tidy_convos(convos)
+.tidy_convos(convos, slack_api_key)
 }
 \arguments{
 \item{convos}{A list returned by slackthreads::conversations.}
+
+\item{slack_api_key}{This user's Slack token.}
 }
 \value{
 A tibble of question data.

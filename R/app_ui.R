@@ -3,7 +3,7 @@
 #' @return A \code{\link[shiny]{tagList}} containing the UI.
 #' @keywords internal
 .app_ui <- function() {
-  dashboard_title <- "DSLC Mentor Tool 2024-04-04"
+  dashboard_title <- "DSLC Mentor Tool 2024-12-05"
   shinydashboard::dashboardPage(
     header = .ui_header(dashboard_title),
     sidebar = .ui_sidebar(),
@@ -44,10 +44,19 @@
     ),
     shiny::fluidRow(
       style = "padding-left:15px;padding-right:15px;",
-      # shiny::uiOutput("question_table"),
-      .question_table_output(),
-      shiny::br(),
-      .refresh_button_output()
+      .question_table_output()
+    ),
+    shiny::fluidRow(
+      style = "padding-left:15px;padding-right:15px;",
+      shiny::column(
+        width = 1,
+        offset = 6,
+        .refresh_button_output()
+      ),
+      shiny::column(
+        width = 1,
+        .more_button_output()
+      )
     )
   )
 }
@@ -76,6 +85,17 @@
     style = "text-align:center;",
     shiny::actionButton(
       "refresh",
+      label = "loading, please wait...",
+      class = "btn-primary"
+    )
+  )
+}
+
+.more_button_output <- function() {
+  shiny::div(
+    style = "text-align:center;",
+    shiny::actionButton(
+      "more",
       label = "loading, please wait...",
       class = "btn-primary"
     )

@@ -9,11 +9,12 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->
 
-The goal of mentordash is to create a dashboard for mentors at the [Data Science Learning Community](https://dslc.io/). Thank you to
-[yonicd](https://github.com/yonicd/slackthreads/) for a great deal of work in
-the slackthreads package\!
+The goal of mentordash is to create a dashboard for mentors at the [Data
+Science Learning Community](https://dslc.io/). Thank you to
+[yonicd](https://github.com/yonicd/threads/) for a great deal of work in
+the threads package!
 
-The dashboard is now [deployed](http://dslc.io/mentordash)\!
+The dashboard is now [deployed](http://dslc.io/mentordash)!
 
 ## Installation
 
@@ -36,7 +37,7 @@ devtools::install_github("r4ds/mentordash")
 
 ``` r
 library(mentordash)
-run_app(local = TRUE)
+run_app()
 ```
 
 ## Contributing

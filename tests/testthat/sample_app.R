@@ -1,2 +1,2 @@
 library(mentordash)
-run_app(local = TRUE)
+run_app()

@@ -4,7 +4,7 @@
 \alias{run_app}
 \title{Run the Shiny Application}
 \usage{
-run_app(local = interactive(), ...)
+run_app(...)
 }
 \arguments{
 \item{...}{arguments to pass to golem_opts. See
