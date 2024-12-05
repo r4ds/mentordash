@@ -11,7 +11,7 @@ pkgload::load_all(
 
 # options("golem.app.prod" = TRUE)
 options("golem.app.prod" = FALSE)
-run_app() # add parameters here (if any)
+run_app()
 
 # Debug just the UI without login:
 

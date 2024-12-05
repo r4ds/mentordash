@@ -6,7 +6,7 @@
 #'   \code{\link[golem]{get_golem_options}} for more details.
 #'
 #' @export
-run_app <- function(local = interactive(), ...) {
+run_app <- function(...) {
   app <- shinyslack::shinyslack_app(
     ui = .app_ui,
     server = .app_server,

@@ -44,7 +44,7 @@ devtools::install_github("r4ds/mentordash")
 
 ```{r example, eval=FALSE}
 library(mentordash)
-run_app(local = TRUE)
+run_app()
 ```
 
 ## Contributing
